@@ -25,49 +25,57 @@ class MainActivity : AppCompatActivity() {
         velocityMaxThreshold = ViewConfiguration.get(this).scaledMaximumFlingVelocity
         movingView.post { movingView.y = container.top - movingView.height.toFloat() }
         container.setOnTouchListener(object : OnTouchListener {
-            var dX = 0f
-            var dY = 0f
             var isEvent = false
             var topToBottom = false
             private val offset = resources.getDimensionPixelSize(R.dimen.swipeStartPositionOffset)
             private var topTouchPosition = 0f
             private var bottomTouchPosition = 0f
             private var isInHighVelocityEvent = false
-            private fun calculatePositions(event: MotionEvent) {
-                dX = container.x - event.rawX
-                dY = container.y - event.rawY
-            }
+            private var previousPositionY = 0f
 
             override fun onTouch(v: View, event: MotionEvent): Boolean {
                 when (event.actionMasked) {
-                    MotionEvent.ACTION_DOWN -> if (movingView.y == movingView.height * (-1).toFloat() && event.y < container.top + offset) {
+                    MotionEvent.ACTION_DOWN -> if (movingView.y == -movingView.height.toFloat() && event.y < container.top + offset) {
                         topToBottom = true
                         topTouchPosition = event.y
-                        calculatePositions(event)
+                        previousPositionY = event.y
                         setVelocityTracker(event)
                         isEvent = true
                     } else if (container.bottom.toFloat() == movingView.y + movingView.height && event.y > container.bottom - offset) {
                         topToBottom = false
                         bottomTouchPosition = event.y
-                        calculatePositions(event)
+                        previousPositionY = event.y
                         setVelocityTracker(event)
                         isEvent = true
                     }
                     MotionEvent.ACTION_MOVE -> if (isEvent) {
-                        val currentVelocity = getVelocity(event)!!
-                        if (!isInHighVelocityEvent && currentVelocity.roundToInt().absoluteValue in velocityMinThreshold..velocityMaxThreshold) {
-                            isInHighVelocityEvent = true
-                            movingView.animate()
-                                .y(if (topToBottom) container.top.toFloat() else container.top.toFloat() - movingView.height)
-                                .setDuration(200)
-                                .start()
-                        } else if (!isInHighVelocityEvent) {
-                            movingView.animate() //                                .x(event.getRawX() + dX)
-                                .y(if (topToBottom) event.y - topTouchPosition - movingView.height else -movingView.height + event.y + (container.bottom - bottomTouchPosition))
-                                .setDuration(0)
-                                .start()
+                        Timber.i("ACTION_MOVE:\ncontainer.bottom ${container.bottom} | container.top ${container.top} | event.y ${event.y} | movingView.height ${movingView.height} | bottomTouchPosition $bottomTouchPosition | topTouchPosition $topTouchPosition")
+//                        var directionChanged = false
+//                        if (topToBottom && previousPositionY > event.y) {
+//                            topToBottom = false
+//                            topTouchPosition = 0f
+//                            directionChanged = true
+//                        } else if (!topToBottom && previousPositionY < event.y) {
+//                            topToBottom = true
+//                            bottomTouchPosition = 0f
+//                            directionChanged = true
+//                        }
+                            val currentVelocity = getVelocity(event)!!
+                            if (!isInHighVelocityEvent && currentVelocity.roundToInt().absoluteValue in velocityMinThreshold..velocityMaxThreshold) {
+                                isInHighVelocityEvent = true
+                                movingView.animate()
+                                    .y(if (topToBottom) container.top.toFloat() else container.top.toFloat() - movingView.height)
+                                    .setDuration(200)
+                                    .start()
+                                previousPositionY = event.y
+                            } else if (!isInHighVelocityEvent) {
+                                movingView.animate()
+                                    .y(if (topToBottom) container.top - movingView.height + (event.y - topTouchPosition) else container.bottom - movingView.height - (bottomTouchPosition - event.y))
+                                    .setDuration(0)
+                                    .start()
+                                previousPositionY = event.y
+                            }
                         }
-                    }
                     MotionEvent.ACTION_UP -> {
                         if (isEvent && !isInHighVelocityEvent) {
                             if (topToBottom) {
