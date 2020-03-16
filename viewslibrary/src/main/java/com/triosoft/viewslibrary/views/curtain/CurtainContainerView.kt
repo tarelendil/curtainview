@@ -1,8 +1,10 @@
 package com.triosoft.viewslibrary.views.curtain
 
+import android.R.attr
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.TypedArray
+import android.os.SystemClock
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.VelocityTracker
@@ -10,11 +12,11 @@ import android.view.View
 import android.view.ViewConfiguration
 import android.widget.LinearLayout
 import androidx.annotation.IdRes
-import androidx.core.view.isVisible
 import com.triosoft.viewslibrary.R
 import com.triosoft.viewslibrary.extensions.pixelToDp
 import timber.log.Timber
 import kotlin.math.*
+
 
 /**
  * Created by ${StasK}
@@ -94,7 +96,7 @@ class CurtainContainerView : LinearLayout {
                 val shouldIntercept = (curtainView.y == -curtainView.height.toFloat()
                         && ev.y < this@CurtainContainerView.top + offset)
                         || (this@CurtainContainerView.bottom.toFloat() == curtainView.y + curtainView.height
-                        && ev.y > this@CurtainContainerView.bottom - offset)
+                        && ev.y > this@CurtainContainerView.bottom - offset) || (actionBarView?.run { bottom > ev.y } == true)
                 Timber.i("onInterceptTouchEvent $shouldIntercept")
                 shouldIntercept
             }
@@ -117,12 +119,24 @@ class CurtainContainerView : LinearLayout {
 
             override fun onTouch(v: View, event: MotionEvent): Boolean {
                 when (event.actionMasked) {
-                    MotionEvent.ACTION_DOWN -> if (curtainView.y == -curtainView.height.toFloat() && event.y < this@CurtainContainerView.top + offset) {
+                    MotionEvent.ACTION_DOWN -> if (curtainView.y == -curtainView.height.toFloat() && ((event.y < this@CurtainContainerView.top + offset) or (actionBarView?.run { bottom > event.y } == true))) {
                         topToBottom = true
                         topTouchPosition = event.y
                         previousPositionY = event.y
                         setVelocityTracker(event)
                         isEvent = true
+                        actionBarView?.let {
+                            val motionEvent = MotionEvent.obtain(
+                                SystemClock.uptimeMillis(),
+                                SystemClock.uptimeMillis() + 100,
+                                MotionEvent.ACTION_MOVE,
+                                0f,
+                                this@CurtainContainerView.top.toFloat() + it.height,
+                                0
+                            )
+                            topTouchPosition = 0f
+                            this@CurtainContainerView.dispatchTouchEvent(motionEvent)
+                        }
                     } else if (this@CurtainContainerView.bottom.toFloat() == curtainView.y + curtainView.height && event.y > this@CurtainContainerView.bottom - offset) {
                         topToBottom = false
                         bottomTouchPosition = event.y
@@ -259,4 +273,10 @@ class CurtainContainerView : LinearLayout {
             val dpUntilTop = resources.pixelToDp(currentPositionY)
             dpUntilTop / velocityDpPerMilliSec
         } * 5).roundToLong().also { Timber.i("calcAnimationDuration: $it") }
+
+    private fun onActionBarViewClicked() {
+        actionBarView?.run {
+
+        }
+    }
 }
