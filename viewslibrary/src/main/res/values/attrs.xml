@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<declare-styleable name="CurtainView">
+		<attr name="cv_container" format="reference" />
+		<attr name="cv_action_bar" format="reference" />
+	</declare-styleable>
+	<declare-styleable name="CurtainContainerView">
+		<attr name="ccv_action_bar" format="reference" />
+		<attr name="ccv_curtain_view" format="reference" />
+	</declare-styleable>
+</resources>

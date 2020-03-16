@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<declare-styleable name="CurtainView">
+		<attr name="cv_container" format="reference" />
+		<attr name="cv_action_bar" format="reference" />
+	</declare-styleable>
+
+</resources>
