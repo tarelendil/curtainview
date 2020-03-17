@@ -1,6 +1,5 @@
 package com.triosoft.viewslibrary.views.curtain
 
-import android.animation.Animator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.TypedArray
@@ -71,7 +70,7 @@ class CurtainContainerView : LinearLayout {
             context.obtainStyledAttributes(attrs, R.styleable.CurtainContainerView)
         curtainId =
             attributes.getResourceId(R.styleable.CurtainContainerView_ccv_curtain_view, View.NO_ID)
-        if (curtainId == View.NO_ID) error("Must prove container view for the curtain view")
+        if (curtainId == View.NO_ID) error("Must provide container view for the curtain view")
         actionBarId =
             attributes.getResourceId(R.styleable.CurtainContainerView_ccv_action_bar, View.NO_ID);
         initView()
@@ -89,7 +88,6 @@ class CurtainContainerView : LinearLayout {
             curtainView.visibility = View.VISIBLE
         }
         setContainerOnTouchListener()
-        setActionBarViewOnClickListener()
     }
 
     private fun initView() {
@@ -118,38 +116,12 @@ class CurtainContainerView : LinearLayout {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun setActionBarViewOnClickListener() {
-        actionBarView?.setOnTouchListener { v, event ->
-            when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> {
-//                    val motionEvent = MotionEvent.obtain(
-//                        SystemClock.uptimeMillis(),
-//                        SystemClock.uptimeMillis() + 1000,
-//                        MotionEvent.ACTION_MOVE,
-//                        0f,
-//                        curtainView.y + v.height,
-//                        0
-//                    )
-                    curtainView.animate().y(curtainView.y + v.height).setDuration(100).start()
-                    topToBottom = true
-                    topTouchPosition = 0f
-                    isEvent = true
-//                    this@CurtainContainerView.dispatchTouchEvent(motionEvent)
-                    false
-                }
-                else -> false
-            }
-
-        }
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
     private fun setContainerOnTouchListener() {
         this@CurtainContainerView.setOnTouchListener { v, event ->
             var eventConsumed = false
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> if (curtainView.y == -curtainView.height.toFloat() && (event.y < this@CurtainContainerView.top + offset || (actionBarView?.run { bottom > event.y } == true))) {
-                    setActionBarViewStartAnimation()
+                    animateActionBarViewAlpha(toAlpha = true)
                     topToBottom = true
                     topTouchPosition = event.y
                     previousPositionY = event.y
@@ -193,7 +165,11 @@ class CurtainContainerView : LinearLayout {
                         curtainView.animate()
                             .y(if (wasMovingDown) this@CurtainContainerView.top.toFloat() else this@CurtainContainerView.top.toFloat() - curtainView.height)
                             .setDuration(calcAnimationDuration(wasMovingDown, event.y))
-                            .setAnimationEndListener { if (!wasMovingDown) setActionBarViewEndAnimation() }
+                            .setAnimationEndListener {
+                                if (!wasMovingDown) animateActionBarViewAlpha(
+                                    toAlpha = false
+                                )
+                            }
                             .start()
                     } else if (isEvent && !isInHighVelocityEvent) {
                         Timber.i("ACTION_UP")
@@ -216,7 +192,8 @@ class CurtainContainerView : LinearLayout {
                                             isMovingDown = false,
                                             currentPositionY = event.y
                                         )
-                                    ).setAnimationEndListener { setActionBarViewEndAnimation() }
+                                    )
+                                    .setAnimationEndListener { animateActionBarViewAlpha(toAlpha = false) }
                                     .start()
                             }
                         } else {
@@ -228,7 +205,8 @@ class CurtainContainerView : LinearLayout {
                                             isMovingDown = false,
                                             currentPositionY = event.y
                                         )
-                                    ).setAnimationEndListener { setActionBarViewEndAnimation() }
+                                    )
+                                    .setAnimationEndListener { animateActionBarViewAlpha(toAlpha = false) }
                                     .start()
                             } else {
                                 curtainView.animate()
@@ -301,19 +279,10 @@ class CurtainContainerView : LinearLayout {
             dpUntilTop / velocityDpPerMilliSec
         } * 5).roundToLong().also { Timber.i("calcAnimationDuration: $it") }
 
-    private fun setActionBarViewEndAnimation() {
-        actionBarView?.let { view ->
-            AlphaAnimation(0.2f, 1f).let { anim ->
-                anim.duration = 700
-                anim.fillAfter = true
-                view.startAnimation(anim)
-            }
-        }
-    }
 
-    private fun setActionBarViewStartAnimation() {
+    private fun animateActionBarViewAlpha(toAlpha: Boolean) {
         actionBarView?.let { view ->
-            AlphaAnimation(1f, 0.2f).let { anim ->
+            AlphaAnimation(if (toAlpha) 1f else 0.2f, if (toAlpha) 0.2f else 1f).let { anim ->
                 anim.duration = 700
                 anim.fillAfter = true
                 view.startAnimation(anim)
