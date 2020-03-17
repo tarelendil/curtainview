@@ -1,19 +1,20 @@
 package com.triosoft.viewslibrary.views.curtain
 
-import android.R.attr
+import android.animation.Animator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.TypedArray
-import android.os.SystemClock
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.View
 import android.view.ViewConfiguration
+import android.view.animation.AlphaAnimation
 import android.widget.LinearLayout
 import androidx.annotation.IdRes
 import com.triosoft.viewslibrary.R
 import com.triosoft.viewslibrary.extensions.pixelToDp
+import com.triosoft.viewslibrary.extensions.setAnimationEndListener
 import timber.log.Timber
 import kotlin.math.*
 
@@ -38,6 +39,14 @@ class CurtainContainerView : LinearLayout {
     private lateinit var curtainView: View
     private var actionBarView: View? = null
     private val velocityDpPerMilliSec = 5
+
+    private var isEvent = false
+    private var topToBottom = false
+    private var topTouchPosition = 0f
+    private var bottomTouchPosition = 0f
+    private var isInHighVelocityEvent = false
+    private var previousPositionY = 0f
+    private var wasMovingDown = true
 
     constructor(context: Context) : super(context) {
         initView()
@@ -80,10 +89,11 @@ class CurtainContainerView : LinearLayout {
             curtainView.visibility = View.VISIBLE
         }
         setContainerOnTouchListener()
+        setActionBarViewOnClickListener()
     }
 
     private fun initView() {
-        velocityMinThreshold = 4000
+        velocityMinThreshold = 3000
         velocityMaxThreshold = ViewConfiguration.get(context).scaledMaximumFlingVelocity
         mTouchSlop = ViewConfiguration.get(context).scaledTouchSlop
         offset = resources.getDimensionPixelSize(R.dimen.swipeStartPositionOffset)
@@ -92,13 +102,13 @@ class CurtainContainerView : LinearLayout {
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         return when (ev.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
-
-                val shouldIntercept = (curtainView.y == -curtainView.height.toFloat()
+                (curtainView.y == -curtainView.height.toFloat()
                         && ev.y < this@CurtainContainerView.top + offset)
                         || (this@CurtainContainerView.bottom.toFloat() == curtainView.y + curtainView.height
                         && ev.y > this@CurtainContainerView.bottom - offset) || (actionBarView?.run { bottom > ev.y } == true)
-                Timber.i("onInterceptTouchEvent $shouldIntercept")
-                shouldIntercept
+            }
+            MotionEvent.ACTION_MOVE -> {
+                false
             }
             else -> {
                 Timber.i("onInterceptTouchEvent else")
@@ -108,130 +118,144 @@ class CurtainContainerView : LinearLayout {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun setContainerOnTouchListener() {
-        this@CurtainContainerView.setOnTouchListener(object : OnTouchListener {
-            var isEvent = false
-            var topToBottom = false
-            private var topTouchPosition = 0f
-            private var bottomTouchPosition = 0f
-            private var isInHighVelocityEvent = false
-            private var previousPositionY = 0f
+    private fun setActionBarViewOnClickListener() {
+        actionBarView?.setOnTouchListener { v, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+//                    val motionEvent = MotionEvent.obtain(
+//                        SystemClock.uptimeMillis(),
+//                        SystemClock.uptimeMillis() + 1000,
+//                        MotionEvent.ACTION_MOVE,
+//                        0f,
+//                        curtainView.y + v.height,
+//                        0
+//                    )
+                    curtainView.animate().y(curtainView.y + v.height).setDuration(100).start()
+                    topToBottom = true
+                    topTouchPosition = 0f
+                    isEvent = true
+//                    this@CurtainContainerView.dispatchTouchEvent(motionEvent)
+                    false
+                }
+                else -> false
+            }
 
-            override fun onTouch(v: View, event: MotionEvent): Boolean {
-                when (event.actionMasked) {
-                    MotionEvent.ACTION_DOWN -> if (curtainView.y == -curtainView.height.toFloat() && ((event.y < this@CurtainContainerView.top + offset) or (actionBarView?.run { bottom > event.y } == true))) {
-                        topToBottom = true
-                        topTouchPosition = event.y
-                        previousPositionY = event.y
-                        setVelocityTracker(event)
-                        isEvent = true
-                        actionBarView?.let {
-                            val motionEvent = MotionEvent.obtain(
-                                SystemClock.uptimeMillis(),
-                                SystemClock.uptimeMillis() + 100,
-                                MotionEvent.ACTION_MOVE,
-                                0f,
-                                this@CurtainContainerView.top.toFloat() + it.height,
-                                0
-                            )
-                            topTouchPosition = 0f
-                            this@CurtainContainerView.dispatchTouchEvent(motionEvent)
-                        }
-                    } else if (this@CurtainContainerView.bottom.toFloat() == curtainView.y + curtainView.height && event.y > this@CurtainContainerView.bottom - offset) {
-                        topToBottom = false
-                        bottomTouchPosition = event.y
-                        previousPositionY = event.y
-                        setVelocityTracker(event)
-                        isEvent = true
-                    }
-                    MotionEvent.ACTION_MOVE -> if (isEvent) {
-                        Timber.i("ACTION_MOVE:\ncontainer.bottom ${this@CurtainContainerView.bottom} | container.top ${this@CurtainContainerView.top} | event.y ${event.y} | movingView.height ${curtainView.height} | bottomTouchPosition $bottomTouchPosition | topTouchPosition $topTouchPosition")
-                        val currentVelocity = getVelocity(event)!!
-                        if (!isInHighVelocityEvent && currentVelocity.roundToInt().absoluteValue in velocityMinThreshold..velocityMaxThreshold) {
-                            isInHighVelocityEvent = true
-                            val isMovingDown = previousPositionY < event.y
-                            curtainView.animate()
-                                .y(if (isMovingDown) this@CurtainContainerView.top.toFloat() else this@CurtainContainerView.top.toFloat() - curtainView.height)
-                                .setDuration(calcAnimationDuration(isMovingDown, event.y))
-                                .start()
-                            previousPositionY = event.y
-                        } else if (!isInHighVelocityEvent) {
-                            curtainView.animate()
-                                .y(
-                                    if (topToBottom) this@CurtainContainerView.top - curtainView.height + min(
-                                        event.y - topTouchPosition,
-                                        curtainView.height.toFloat()
-                                    ) else this@CurtainContainerView.bottom - curtainView.height - (max(
-                                        bottomTouchPosition - event.y,
-                                        0f
-                                    ))
-                                )
-                                .setDuration(0)
-                                .start()
-                            previousPositionY = event.y
-                        }
-                    }
-                    MotionEvent.ACTION_UP -> {
-                        if (isEvent && !isInHighVelocityEvent) {
-                            Timber.i("ACTION_UP")
-                            if (topToBottom) {
-                                if (event.y > this@CurtainContainerView.bottom * 0.4) {
-                                    curtainView.animate()
-                                        .y(this@CurtainContainerView.bottom - curtainView.height.toFloat())
-                                        .setDuration(
-                                            calcAnimationDuration(
-                                                isMovingDown = true,
-                                                currentPositionY = event.y
-                                            )
-                                        )
-                                        .start()
-                                } else {
-                                    curtainView.animate()
-                                        .y(this@CurtainContainerView.top - curtainView.height.toFloat())
-                                        .setDuration(
-                                            calcAnimationDuration(
-                                                isMovingDown = false,
-                                                currentPositionY = event.y
-                                            )
-                                        )
-                                        .start()
-                                }
-                            } else {
-                                if (event.y < this@CurtainContainerView.bottom - this@CurtainContainerView.bottom * 0.4) {
-                                    curtainView.animate()
-                                        .y(this@CurtainContainerView.top - curtainView.height.toFloat())
-                                        .setDuration(
-                                            calcAnimationDuration(
-                                                isMovingDown = false,
-                                                currentPositionY = event.y
-                                            )
-                                        )
-                                        .start()
-                                } else {
-                                    curtainView.animate()
-                                        .y(this@CurtainContainerView.bottom - curtainView.height.toFloat())
-                                        .setDuration(
-                                            calcAnimationDuration(
-                                                isMovingDown = true,
-                                                currentPositionY = event.y
-                                            )
-                                        )
-                                        .start()
-                                }
-                            }
-                        }
-                        releaseVelocityTracker()
-                        isEvent = false
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setContainerOnTouchListener() {
+        this@CurtainContainerView.setOnTouchListener { v, event ->
+            var eventConsumed = false
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> if (curtainView.y == -curtainView.height.toFloat() && (event.y < this@CurtainContainerView.top + offset || (actionBarView?.run { bottom > event.y } == true))) {
+                    setActionBarViewStartAnimation()
+                    topToBottom = true
+                    topTouchPosition = event.y
+                    previousPositionY = event.y
+                    setVelocityTracker(event)
+                    isEvent = true
+                    eventConsumed = true
+                } else if (this@CurtainContainerView.bottom.toFloat() == curtainView.y + curtainView.height && event.y > this@CurtainContainerView.bottom - offset) {
+                    topToBottom = false
+                    bottomTouchPosition = event.y
+                    previousPositionY = event.y
+                    setVelocityTracker(event)
+                    isEvent = true
+                    eventConsumed = true
+                }
+                MotionEvent.ACTION_MOVE -> if (isEvent) {
+                    Timber.i("ACTION_MOVE:\ncontainer.bottom ${this@CurtainContainerView.bottom} | container.top ${this@CurtainContainerView.top} | event.y ${event.y} | movingView.height ${curtainView.height} | bottomTouchPosition $bottomTouchPosition | topTouchPosition $topTouchPosition")
+                    wasMovingDown = previousPositionY < event.y
+                    val currentVelocity = getVelocity(event) ?: 0f
+                    if (!isInHighVelocityEvent && currentVelocity.roundToInt().absoluteValue in velocityMinThreshold..velocityMaxThreshold) {
+                        isInHighVelocityEvent = true
+                    } else if (isInHighVelocityEvent && currentVelocity.roundToInt().absoluteValue !in velocityMinThreshold..velocityMaxThreshold) {
                         isInHighVelocityEvent = false
                     }
-                    MotionEvent.ACTION_CANCEL -> {
-                        releaseVelocityTracker()
-                    }
-                    else -> return false
+                    curtainView.animate()
+                        .y(
+                            if (topToBottom) this@CurtainContainerView.top - curtainView.height + min(
+                                event.y - topTouchPosition,
+                                curtainView.height.toFloat()
+                            ) else this@CurtainContainerView.bottom - curtainView.height - (max(
+                                bottomTouchPosition - event.y,
+                                0f
+                            ))
+                        )
+                        .setDuration(0)
+                        .start()
+                    previousPositionY = event.y
+                    eventConsumed = true
                 }
-                return true
+                MotionEvent.ACTION_UP -> {
+                    if (isEvent && isInHighVelocityEvent) {
+                        curtainView.animate()
+                            .y(if (wasMovingDown) this@CurtainContainerView.top.toFloat() else this@CurtainContainerView.top.toFloat() - curtainView.height)
+                            .setDuration(calcAnimationDuration(wasMovingDown, event.y))
+                            .setAnimationEndListener { if (!wasMovingDown) setActionBarViewEndAnimation() }
+                            .start()
+                    } else if (isEvent && !isInHighVelocityEvent) {
+                        Timber.i("ACTION_UP")
+                        if (topToBottom) {
+                            if (event.y > this@CurtainContainerView.bottom * 0.4) {
+                                curtainView.animate()
+                                    .y(this@CurtainContainerView.bottom - curtainView.height.toFloat())
+                                    .setDuration(
+                                        calcAnimationDuration(
+                                            isMovingDown = true,
+                                            currentPositionY = event.y
+                                        )
+                                    )
+                                    .start()
+                            } else {
+                                curtainView.animate()
+                                    .y(this@CurtainContainerView.top - curtainView.height.toFloat())
+                                    .setDuration(
+                                        calcAnimationDuration(
+                                            isMovingDown = false,
+                                            currentPositionY = event.y
+                                        )
+                                    ).setAnimationEndListener { setActionBarViewEndAnimation() }
+                                    .start()
+                            }
+                        } else {
+                            if (event.y < this@CurtainContainerView.bottom - this@CurtainContainerView.bottom * 0.4) {
+                                curtainView.animate()
+                                    .y(this@CurtainContainerView.top - curtainView.height.toFloat())
+                                    .setDuration(
+                                        calcAnimationDuration(
+                                            isMovingDown = false,
+                                            currentPositionY = event.y
+                                        )
+                                    ).setAnimationEndListener { setActionBarViewEndAnimation() }
+                                    .start()
+                            } else {
+                                curtainView.animate()
+                                    .y(this@CurtainContainerView.bottom - curtainView.height.toFloat())
+                                    .setDuration(
+                                        calcAnimationDuration(
+                                            isMovingDown = true,
+                                            currentPositionY = event.y
+                                        )
+                                    ).start()
+                            }
+                        }
+                    }
+                    eventConsumed = true
+                    releaseVelocityTracker()
+                    isEvent = false
+                    isInHighVelocityEvent = false
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    isEvent = false
+                    isInHighVelocityEvent = false
+                    releaseVelocityTracker()
+                    eventConsumed = true
+                }
             }
-        })
+            eventConsumed
+        }
     }
 
     private fun setVelocityTracker(event: MotionEvent) {
@@ -267,16 +291,33 @@ class CurtainContainerView : LinearLayout {
 
     private fun calcAnimationDuration(isMovingDown: Boolean, currentPositionY: Float) =
         (if (isMovingDown) {
-            val dpUntilBottom = resources.pixelToDp(curtainView.height - currentPositionY)
+            val dpUntilBottom = max(
+                0f,
+                resources.pixelToDp(curtainView.height - currentPositionY)
+            )
             dpUntilBottom / velocityDpPerMilliSec
         } else {
-            val dpUntilTop = resources.pixelToDp(currentPositionY)
+            val dpUntilTop = resources.pixelToDp(max(0f, currentPositionY))
             dpUntilTop / velocityDpPerMilliSec
         } * 5).roundToLong().also { Timber.i("calcAnimationDuration: $it") }
 
-    private fun onActionBarViewClicked() {
-        actionBarView?.run {
+    private fun setActionBarViewEndAnimation() {
+        actionBarView?.let { view ->
+            AlphaAnimation(0.2f, 1f).let { anim ->
+                anim.duration = 700
+                anim.fillAfter = true
+                view.startAnimation(anim)
+            }
+        }
+    }
 
+    private fun setActionBarViewStartAnimation() {
+        actionBarView?.let { view ->
+            AlphaAnimation(1f, 0.2f).let { anim ->
+                anim.duration = 700
+                anim.fillAfter = true
+                view.startAnimation(anim)
+            }
         }
     }
 }
