@@ -9,8 +9,8 @@ import android.view.VelocityTracker
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.animation.AlphaAnimation
-import android.widget.LinearLayout
 import androidx.annotation.IdRes
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.triosoft.viewslibrary.R
 import com.triosoft.viewslibrary.extensions.pixelToDp
 import com.triosoft.viewslibrary.extensions.setAnimationEndListener
@@ -21,7 +21,7 @@ import kotlin.math.*
 /**
  * Created by ${StasK}
  */
-class CurtainContainerView : LinearLayout {
+class CurtainContainerView : ConstraintLayout {
 
     private var velocityTracker: VelocityTracker? = null
     private var velocityMinThreshold: Int = 0
@@ -46,7 +46,7 @@ class CurtainContainerView : LinearLayout {
     private var isInHighVelocityEvent = false
     private var previousPositionY = 0f
     private var wasMovingDown = true
-
+    private var alphaAnimationDurationMillis = 700L
     constructor(context: Context) : super(context) {
         initView()
     }
@@ -73,6 +73,9 @@ class CurtainContainerView : LinearLayout {
         if (curtainId == View.NO_ID) error("Must provide container view for the curtain view")
         actionBarId =
             attributes.getResourceId(R.styleable.CurtainContainerView_ccv_action_bar, View.NO_ID);
+        velocityMinThreshold = attributes.getInteger(R.styleable.CurtainContainerView_ccv_velocity_minimum_threshold, 3000)
+        alphaAnimationDurationMillis = attributes.getInteger(R.styleable.CurtainContainerView_ccv_alpha_animation_duration_millis, 700).toLong()
+
         initView()
         attributes.recycle()
     }
@@ -91,7 +94,6 @@ class CurtainContainerView : LinearLayout {
     }
 
     private fun initView() {
-        velocityMinThreshold = 3000
         velocityMaxThreshold = ViewConfiguration.get(context).scaledMaximumFlingVelocity
         mTouchSlop = ViewConfiguration.get(context).scaledTouchSlop
         offset = resources.getDimensionPixelSize(R.dimen.swipeStartPositionOffset)
@@ -277,8 +279,8 @@ class CurtainContainerView : LinearLayout {
 
     private fun animateActionBarViewAlpha(toAlpha: Boolean) {
         actionBarView?.let { view ->
-            AlphaAnimation(if (toAlpha) 1f else 0.2f, if (toAlpha) 0.2f else 1f).let { anim ->
-                anim.duration = 700
+            AlphaAnimation(if (toAlpha) 1f else 0.1f, if (toAlpha) 0.1f else 1f).let { anim ->
+                anim.duration = alphaAnimationDurationMillis
                 anim.fillAfter = true
                 view.startAnimation(anim)
             }

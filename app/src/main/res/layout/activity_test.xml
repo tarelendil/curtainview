@@ -7,12 +7,9 @@
     android:background="#000"
     app:ccv_action_bar="@+id/tv_fake_action_bar"
     app:ccv_curtain_view="@+id/curtain"
+    app:ccv_alpha_animation_duration_millis="400"
+    app:ccv_velocity_minimum_threshold="2500"
     tools:context=".activities.TestActivity">
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
         <TextView
             android:id="@+id/tv_fake_action_bar"
@@ -198,5 +195,4 @@
         <!--        android:layout_height="match_parent"-->
         <!--        app:cv_container="@+id/container"-->
         <!--        android:background="@color/colorPrimary"/>-->
-    </androidx.constraintlayout.widget.ConstraintLayout>
 </com.triosoft.viewslibrary.views.curtain.CurtainContainerView>
