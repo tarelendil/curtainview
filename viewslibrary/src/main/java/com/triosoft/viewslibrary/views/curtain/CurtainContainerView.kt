@@ -26,8 +26,9 @@ class CurtainContainerView : ConstraintLayout {
     private var velocityTracker: VelocityTracker? = null
     private var velocityMinThreshold: Int = 0
     private var velocityMaxThreshold: Int = 0
-    private var mTouchSlop: Int = 0
-    private var offset: Int = 0
+    private var touchSlop: Int = 0
+    private var topOffset: Int = 0
+    private var bottomOffset: Int = 0
 
     @IdRes
     private var curtainId: Int = 0
@@ -40,13 +41,16 @@ class CurtainContainerView : ConstraintLayout {
     private val velocityDpPerMilliSec = 5
 
     private var isEvent = false
-    private var topToBottom = false
+    private var isTopToBottom = false
     private var topTouchPosition = 0f
     private var bottomTouchPosition = 0f
     private var isInHighVelocityEvent = false
     private var previousPositionY = 0f
     private var wasMovingDown = true
     private var alphaAnimationDurationMillis = 700L
+    private var shouldCheckSlop = false
+    private var interceptedEventDownYPosition = 0f
+
     constructor(context: Context) : super(context) {
         initView()
     }
@@ -73,8 +77,14 @@ class CurtainContainerView : ConstraintLayout {
         if (curtainId == View.NO_ID) error("Must provide container view for the curtain view")
         actionBarId =
             attributes.getResourceId(R.styleable.CurtainContainerView_ccv_action_bar, View.NO_ID);
-        velocityMinThreshold = attributes.getInteger(R.styleable.CurtainContainerView_ccv_velocity_minimum_threshold, 3000)
-        alphaAnimationDurationMillis = attributes.getInteger(R.styleable.CurtainContainerView_ccv_alpha_animation_duration_millis, 700).toLong()
+        velocityMinThreshold = attributes.getInteger(
+            R.styleable.CurtainContainerView_ccv_velocity_minimum_threshold,
+            3000
+        )
+        alphaAnimationDurationMillis = attributes.getInteger(
+            R.styleable.CurtainContainerView_ccv_alpha_animation_duration_millis,
+            700
+        ).toLong()
 
         initView()
         attributes.recycle()
@@ -82,9 +92,13 @@ class CurtainContainerView : ConstraintLayout {
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        Timber.i("onAttachedToWindow")
         curtainView = findViewById(curtainId)
         actionBarView = findViewById(actionBarId)
+        actionBarView?.post {
+            topOffset = actionBarView?.height
+                ?: resources.getDimensionPixelSize(R.dimen.swipeStartPositionOffset)
+            bottomOffset = this.height
+        }
         curtainView.post {
             Timber.i("curtainView.post")
             curtainView.y = this@CurtainContainerView.top - curtainView.height.toFloat()
@@ -95,19 +109,36 @@ class CurtainContainerView : ConstraintLayout {
 
     private fun initView() {
         velocityMaxThreshold = ViewConfiguration.get(context).scaledMaximumFlingVelocity
-        mTouchSlop = ViewConfiguration.get(context).scaledTouchSlop
-        offset = resources.getDimensionPixelSize(R.dimen.swipeStartPositionOffset)
+        touchSlop = ViewConfiguration.get(context).scaledTouchSlop
     }
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         return when (ev.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
-                (curtainView.y == -curtainView.height.toFloat()
-                        && ev.y < this@CurtainContainerView.top + offset)
-                        || (this@CurtainContainerView.bottom.toFloat() == curtainView.y + curtainView.height
-                        && ev.y > this@CurtainContainerView.bottom - offset) || (actionBarView?.run { bottom > ev.y } == true)
+                if (curtainView.y == -curtainView.height.toFloat()
+                    && ev.y < this@CurtainContainerView.top + topOffset
+                ) {
+                    shouldCheckSlop = true
+                    setEventProperties(true, ev)
+                } else if (this@CurtainContainerView.bottom.toFloat() == curtainView.y + curtainView.height
+                    && ev.y > this@CurtainContainerView.bottom - bottomOffset
+                ) {
+                    shouldCheckSlop = true
+                    setEventProperties(false, ev)
+                } else shouldCheckSlop = false
+                false
             }
-            else -> false.also { Timber.i("onInterceptTouchEvent else") }
+            MotionEvent.ACTION_MOVE -> {
+                if (shouldCheckSlop && (ev.y - interceptedEventDownYPosition).absoluteValue > touchSlop) {
+                    isEvent = true
+                    true
+                } else false
+            }
+
+            else -> false.also {
+                shouldCheckSlop = false
+                Timber.i("onInterceptTouchEvent else")
+            }
 
         }
     }
@@ -117,19 +148,13 @@ class CurtainContainerView : ConstraintLayout {
         this@CurtainContainerView.setOnTouchListener { v, event ->
             var eventConsumed = false
             when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> if (curtainView.y == -curtainView.height.toFloat() && (event.y < this@CurtainContainerView.top + offset || (actionBarView?.run { bottom > event.y } == true))) {
+                MotionEvent.ACTION_DOWN -> if (curtainView.y == -curtainView.height.toFloat() && (event.y < this@CurtainContainerView.top + topOffset)) {
                     animateActionBarViewAlpha(toAlpha = true)
-                    topToBottom = true
-                    topTouchPosition = event.y
-                    previousPositionY = event.y
-                    setVelocityTracker(event)
+                    setEventProperties(true, event)
                     isEvent = true
                     eventConsumed = true
-                } else if (this@CurtainContainerView.bottom.toFloat() == curtainView.y + curtainView.height && event.y > this@CurtainContainerView.bottom - offset) {
-                    topToBottom = false
-                    bottomTouchPosition = event.y
-                    previousPositionY = event.y
-                    setVelocityTracker(event)
+                } else if (this@CurtainContainerView.bottom.toFloat() == curtainView.y + curtainView.height && event.y > this@CurtainContainerView.bottom - bottomOffset) {
+                    setEventProperties(false, event)
                     isEvent = true
                     eventConsumed = true
                 }
@@ -144,7 +169,7 @@ class CurtainContainerView : ConstraintLayout {
                     }
                     curtainView.animate()
                         .y(
-                            if (topToBottom) this@CurtainContainerView.top - curtainView.height + min(
+                            if (isTopToBottom) this@CurtainContainerView.top - curtainView.height + min(
                                 event.y - topTouchPosition,
                                 curtainView.height.toFloat()
                             ) else this@CurtainContainerView.bottom - curtainView.height - (max(
@@ -162,14 +187,19 @@ class CurtainContainerView : ConstraintLayout {
                         if (isInHighVelocityEvent) {
                             curtainView.animate()
                                 .y(if (wasMovingDown) this@CurtainContainerView.top.toFloat() else this@CurtainContainerView.top.toFloat() - curtainView.height)
-                                .setDuration(calcAnimationDuration(wasMovingDown, event.y))
+                                .setDuration(
+                                    calcAnimationDuration(
+                                        wasMovingDown,
+                                        curtainView.y + curtainView.height
+                                    )
+                                )
                                 .setAnimationEndListener {
                                     if (!wasMovingDown) animateActionBarViewAlpha(
                                         toAlpha = false
                                     )
                                 }.start()
                         } else {
-                            if (topToBottom) {
+                            if (isTopToBottom) {
                                 if (event.y > this@CurtainContainerView.bottom * 0.4) {
                                     curtainView.animate()
                                         .y(this@CurtainContainerView.bottom - curtainView.height.toFloat())
@@ -193,13 +223,13 @@ class CurtainContainerView : ConstraintLayout {
                                         .start()
                                 }
                             } else {
-                                if (event.y < this@CurtainContainerView.bottom - this@CurtainContainerView.bottom * 0.4) {
+                                if (curtainView.y + curtainView.height < this@CurtainContainerView.bottom * 0.6) {
                                     curtainView.animate()
                                         .y(this@CurtainContainerView.top - curtainView.height.toFloat())
                                         .setDuration(
                                             calcAnimationDuration(
                                                 isMovingDown = false,
-                                                currentPositionY = event.y
+                                                currentPositionY = curtainView.y + curtainView.height
                                             )
                                         )
                                         .setAnimationEndListener { animateActionBarViewAlpha(toAlpha = false) }
@@ -210,7 +240,7 @@ class CurtainContainerView : ConstraintLayout {
                                         .setDuration(
                                             calcAnimationDuration(
                                                 isMovingDown = true,
-                                                currentPositionY = event.y
+                                                currentPositionY = curtainView.y + curtainView.height
                                             )
                                         ).start()
                                 }
@@ -285,5 +315,12 @@ class CurtainContainerView : ConstraintLayout {
                 view.startAnimation(anim)
             }
         }
+    }
+
+    private fun setEventProperties(isTopToBottom: Boolean, event: MotionEvent){
+        this.isTopToBottom = isTopToBottom
+        previousPositionY = event.y
+        bottomTouchPosition = event.y
+        setVelocityTracker(event)
     }
 }
