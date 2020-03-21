@@ -1,7 +1,9 @@
 package com.triosoft.android.viewslibrary.extensions
 
 import android.animation.Animator
+import android.view.View
 import android.view.ViewPropertyAnimator
+import android.view.ViewTreeObserver
 
 
 fun ViewPropertyAnimator.setAnimationEndListener(action: () -> Unit): ViewPropertyAnimator =
@@ -15,3 +17,12 @@ fun ViewPropertyAnimator.setAnimationEndListener(action: () -> Unit): ViewProper
         override fun onAnimationCancel(animation: Animator?) {}
         override fun onAnimationStart(animation: Animator?) {}
     })
+
+fun View.setOneTimeGlobalLayoutObserver(action: () -> Unit) {
+    viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+        override fun onGlobalLayout() {
+            viewTreeObserver.removeOnGlobalLayoutListener(this)
+            action()
+        }
+    })
+}

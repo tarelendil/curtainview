@@ -14,6 +14,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.triosoft.android.viewslibrary.R
 import com.triosoft.android.viewslibrary.extensions.pixelToDp
 import com.triosoft.android.viewslibrary.extensions.setAnimationEndListener
+import com.triosoft.android.viewslibrary.extensions.setOneTimeGlobalLayoutObserver
 import timber.log.Timber
 import kotlin.math.*
 
@@ -94,15 +95,21 @@ class CurtainContainerView : ConstraintLayout {
         super.onAttachedToWindow()
         curtainView = findViewById(curtainId)
         actionBarView = findViewById(actionBarId)
-        actionBarView?.post {
-            topOffset = actionBarView?.height
-                ?: resources.getDimensionPixelSize(R.dimen.swipeStartPositionOffset)
-            bottomOffset = this.height
-        }
-        curtainView.post {
-            Timber.i("curtainView.post")
+        if (actionBarView != null) {
+            topOffset = 0
+            actionBarView!!.setOneTimeGlobalLayoutObserver {
+                Timber.i("actionBarView?.viewTreeObserver")
+                topOffset = actionBarView!!.height
+            }
+        } else topOffset = resources.getDimensionPixelSize(R.dimen.swipeStartPositionOffset)
+
+        curtainView.setOneTimeGlobalLayoutObserver {
+            Timber.i("curtainView.viewTreeObserver")
             curtainView.y = this@CurtainContainerView.top - curtainView.height.toFloat()
             curtainView.visibility = View.VISIBLE
+        }
+        this.setOneTimeGlobalLayoutObserver{
+            bottomOffset = this.height
         }
         setContainerOnTouchListener()
     }
@@ -317,7 +324,7 @@ class CurtainContainerView : ConstraintLayout {
         }
     }
 
-    private fun setEventProperties(isTopToBottom: Boolean, event: MotionEvent){
+    private fun setEventProperties(isTopToBottom: Boolean, event: MotionEvent) {
         this.isTopToBottom = isTopToBottom
         previousPositionY = event.y
         bottomTouchPosition = event.y
