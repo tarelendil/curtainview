@@ -1,0 +1,2 @@
+rootProject.name='ViewsLibrary'
+include ':app', ':viewslibrary'
