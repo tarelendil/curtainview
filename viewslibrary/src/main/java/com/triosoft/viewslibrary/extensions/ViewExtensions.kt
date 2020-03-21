@@ -6,7 +6,7 @@ import android.util.DisplayMetrics
 import android.view.ViewPropertyAnimator
 
 
-fun ViewPropertyAnimator.setAnimationEndListener(action: () -> Unit) =
+fun ViewPropertyAnimator.setAnimationEndListener(action: () -> Unit): ViewPropertyAnimator =
     setListener(object : Animator.AnimatorListener {
         override fun onAnimationRepeat(animation: Animator?) {}
         override fun onAnimationEnd(animation: Animator?) {
