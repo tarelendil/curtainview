@@ -4,10 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.TypedArray
 import android.util.AttributeSet
-import android.view.MotionEvent
-import android.view.VelocityTracker
-import android.view.View
-import android.view.ViewConfiguration
+import android.view.*
 import android.view.animation.AlphaAnimation
 import androidx.annotation.IdRes
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -51,6 +48,7 @@ class CurtainContainerView : ConstraintLayout {
     private var alphaAnimationDurationMillis = 700L
     private var shouldCheckSlop = false
     private var interceptedEventDownYPosition = 0f
+    private var waitForActionBarVisibility = false
 
     constructor(context: Context) : super(context) {
         initView()
@@ -86,7 +84,10 @@ class CurtainContainerView : ConstraintLayout {
             R.styleable.CurtainContainerView_ccv_alpha_animation_duration_millis,
             700
         ).toLong()
-
+        waitForActionBarVisibility = attributes.getBoolean(
+            R.styleable.CurtainContainerView_ccv_wait_for_action_bar_visibility,
+            false
+        )
         initView()
         attributes.recycle()
     }
@@ -97,7 +98,15 @@ class CurtainContainerView : ConstraintLayout {
         actionBarView = findViewById(actionBarId)
         if (actionBarView != null) {
             topOffset = 0
-            actionBarView!!.setOneTimeGlobalLayoutObserver {
+            if (waitForActionBarVisibility) {
+                actionBarView!!.viewTreeObserver.addOnGlobalLayoutListener(object :
+                    ViewTreeObserver.OnGlobalLayoutListener {
+                    override fun onGlobalLayout() {
+                        topOffset = actionBarView!!.height
+                        if (topOffset > 0) viewTreeObserver.removeOnGlobalLayoutListener(this)
+                    }
+                })
+            } else actionBarView!!.setOneTimeGlobalLayoutObserver {
                 Timber.i("actionBarView?.viewTreeObserver")
                 topOffset = actionBarView!!.height
             }
@@ -108,7 +117,7 @@ class CurtainContainerView : ConstraintLayout {
             curtainView.y = this@CurtainContainerView.top - curtainView.height.toFloat()
             curtainView.visibility = View.VISIBLE
         }
-        this.setOneTimeGlobalLayoutObserver{
+        this.setOneTimeGlobalLayoutObserver {
             bottomOffset = this.height
         }
         setContainerOnTouchListener()

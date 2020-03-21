@@ -10,6 +10,6 @@
 		<attr name="ccv_curtain_view" format="reference" />
 		<attr name="ccv_alpha_animation_duration_millis" format="integer" />
 		<attr name="ccv_velocity_minimum_threshold" format="integer" />
-
+		<attr name="ccv_wait_for_action_bar_visibility" format="integer" />
 	</declare-styleable>
 </resources>
