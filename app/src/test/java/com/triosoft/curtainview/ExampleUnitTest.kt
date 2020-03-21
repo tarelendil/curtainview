@@ -1,4 +1,4 @@
-package com.triosoft.curtainview
+package com.triosoft.android.curtainview
 
 import org.junit.Test
 

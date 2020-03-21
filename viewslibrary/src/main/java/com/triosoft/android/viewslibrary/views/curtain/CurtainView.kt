@@ -1,4 +1,4 @@
-package com.triosoft.viewslibrary.views.curtain
+package com.triosoft.android.viewslibrary.views.curtain
 
 import android.content.Context
 import android.content.res.TypedArray
@@ -9,7 +9,7 @@ import android.view.View
 import android.view.ViewConfiguration
 import android.widget.LinearLayout
 import androidx.annotation.IdRes
-import com.triosoft.viewslibrary.R
+import com.triosoft.android.viewslibrary.R
 import timber.log.Timber
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt

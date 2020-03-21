@@ -1,4 +1,4 @@
-package com.triosoft.viewslibrary
+package com.triosoft.android.viewslibrary
 
 import org.junit.Test
 

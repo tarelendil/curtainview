@@ -2,8 +2,7 @@ package com.triosoft.curtainview.activities
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Toast
-import com.triosoft.curtainview.R
+import com.android.curtainview.R
 
 class TestActivity : AppCompatActivity() {
 

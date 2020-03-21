@@ -1,4 +1,4 @@
-package com.triosoft.viewslibrary.views.curtain
+package com.triosoft.android.viewslibrary.views.curtain
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -11,9 +11,9 @@ import android.view.ViewConfiguration
 import android.view.animation.AlphaAnimation
 import androidx.annotation.IdRes
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.triosoft.viewslibrary.R
-import com.triosoft.viewslibrary.extensions.pixelToDp
-import com.triosoft.viewslibrary.extensions.setAnimationEndListener
+import com.triosoft.android.viewslibrary.R
+import com.triosoft.android.viewslibrary.extensions.pixelToDp
+import com.triosoft.android.viewslibrary.extensions.setAnimationEndListener
 import timber.log.Timber
 import kotlin.math.*
 
@@ -76,7 +76,7 @@ class CurtainContainerView : ConstraintLayout {
             attributes.getResourceId(R.styleable.CurtainContainerView_ccv_curtain_view, View.NO_ID)
         if (curtainId == View.NO_ID) error("Must provide container view for the curtain view")
         actionBarId =
-            attributes.getResourceId(R.styleable.CurtainContainerView_ccv_action_bar, View.NO_ID);
+            attributes.getResourceId(R.styleable.CurtainContainerView_ccv_action_bar, View.NO_ID)
         velocityMinThreshold = attributes.getInteger(
             R.styleable.CurtainContainerView_ccv_velocity_minimum_threshold,
             3000

@@ -1,6 +1,7 @@
 package com.triosoft.curtainview
 
 import android.app.Application
+import com.triosoft.android.viewslibrary.BuildConfig
 import timber.log.Timber
 
 class App: Application() {

@@ -1,8 +1,6 @@
-package com.triosoft.viewslibrary.extensions
+package com.triosoft.android.viewslibrary.extensions
 
 import android.animation.Animator
-import android.content.res.Resources
-import android.util.DisplayMetrics
 import android.view.ViewPropertyAnimator
 
 

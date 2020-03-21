@@ -1,4 +1,4 @@
-package com.triosoft.curtainview
+package com.triosoft.android.curtainview
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.triosoft.curtainview", appContext.packageName)
+        assertEquals("com.triosoft.android.curtainview", appContext.packageName)
     }
 }

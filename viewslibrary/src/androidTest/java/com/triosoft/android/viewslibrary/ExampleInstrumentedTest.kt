@@ -1,4 +1,4 @@
-package com.triosoft.viewslibrary
+package com.triosoft.android.viewslibrary
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

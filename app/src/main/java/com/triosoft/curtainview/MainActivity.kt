@@ -1,4 +1,4 @@
-//package com.triosoft.curtainview
+//package com.triosoft.android.curtainview
 //
 //import android.os.Bundle
 //import android.view.MotionEvent
