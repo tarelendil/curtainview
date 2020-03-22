@@ -50,6 +50,7 @@ class CurtainContainerView : ConstraintLayout {
     private var shouldCheckSlop = false
     private var interceptedEventDownYPosition = 0f
     private var waitForActionBarVisibility = false
+    private var lastHighVelocityValue = 0f
 
     constructor(context: Context) : super(context) {
         initView()
@@ -100,7 +101,7 @@ class CurtainContainerView : ConstraintLayout {
         if (actionBarView != null) {
             topOffset = 0
             if (waitForActionBarVisibility) {
-                actionBarView!!.setGlobalLayoutObserver{
+                actionBarView!!.setGlobalLayoutObserver {
                     topOffset = actionBarView!!.height
                     topOffset > 0
                 }
@@ -122,6 +123,7 @@ class CurtainContainerView : ConstraintLayout {
     }
 
     private fun initView() {
+        velocityMinThreshold = ViewConfiguration.get(context).scaledMinimumFlingVelocity * 10
         velocityMaxThreshold = ViewConfiguration.get(context).scaledMaximumFlingVelocity
         touchSlop = ViewConfiguration.get(context).scaledTouchSlop
     }
@@ -178,6 +180,7 @@ class CurtainContainerView : ConstraintLayout {
                     val currentVelocity = getVelocity(event) ?: 0f
                     if (!isInHighVelocityEvent && currentVelocity.roundToInt().absoluteValue in velocityMinThreshold..velocityMaxThreshold) {
                         isInHighVelocityEvent = true
+                        lastHighVelocityValue = currentVelocity
                     } else if (isInHighVelocityEvent && currentVelocity.roundToInt().absoluteValue !in velocityMinThreshold..velocityMaxThreshold) {
                         isInHighVelocityEvent = false
                     }
@@ -204,7 +207,7 @@ class CurtainContainerView : ConstraintLayout {
                                 .setDuration(
                                     calcAnimationDuration(
                                         wasMovingDown,
-                                        curtainView.y + curtainView.height
+                                        curtainView.y + curtainView.height, true
                                     )
                                 )
                                 .setAnimationEndListener {
@@ -300,6 +303,7 @@ class CurtainContainerView : ConstraintLayout {
             // When you want to determine the velocity, call
             // computeCurrentVelocity(). Then call getXVelocity()
             // and getYVelocity() to retrieve the velocity for each pointer ID.
+            // A value of 1 provides pixels per millisecond, 1000 provides pixels per second
             computeCurrentVelocity(1000)
             // Log velocity of pixels per second
             // Best practice to use VelocityTrackerCompat where possible.
@@ -308,7 +312,11 @@ class CurtainContainerView : ConstraintLayout {
             yVelocity
         }
 
-    private fun calcAnimationDuration(isMovingDown: Boolean, currentPositionY: Float) =
+    private fun calcAnimationDuration(
+        isMovingDown: Boolean,
+        currentPositionY: Float,
+        isHighVelocity: Boolean = false
+    ) =
         (if (isMovingDown) {
             val dpUntilBottom = max(
                 0f,
@@ -318,7 +326,8 @@ class CurtainContainerView : ConstraintLayout {
         } else {
             val dpUntilTop = resources.pixelToDp(max(0f, currentPositionY))
             dpUntilTop / velocityDpPerMilliSec
-        } * 5).roundToLong().also { Timber.i("calcAnimationDuration: $it") }
+        } * if (isHighVelocity) 3 else 5).roundToLong()
+            .also { Timber.i("calcAnimationDuration: $it") }
 
 
     private fun animateActionBarViewAlpha(toAlpha: Boolean) {
@@ -334,7 +343,7 @@ class CurtainContainerView : ConstraintLayout {
     private fun setEventProperties(isTopToBottom: Boolean, event: MotionEvent) {
         this.isTopToBottom = isTopToBottom
         previousPositionY = event.y
-        bottomTouchPosition = event.y
+        if (isTopToBottom) topTouchPosition = event.y else bottomTouchPosition = event.y
         setVelocityTracker(event)
     }
 }
