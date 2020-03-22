@@ -123,7 +123,10 @@ class CurtainContainerView : ConstraintLayout {
     }
 
     private fun initView() {
-        velocityMinThreshold = ViewConfiguration.get(context).scaledMinimumFlingVelocity * 10
+        if (velocityMinThreshold == 0) {
+            velocityMinThreshold = ViewConfiguration.get(context).scaledMinimumFlingVelocity * 10
+        }
+
         velocityMaxThreshold = ViewConfiguration.get(context).scaledMaximumFlingVelocity
         touchSlop = ViewConfiguration.get(context).scaledTouchSlop
     }
