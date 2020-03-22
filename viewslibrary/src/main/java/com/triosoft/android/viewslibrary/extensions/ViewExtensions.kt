@@ -26,3 +26,11 @@ fun View.setOneTimeGlobalLayoutObserver(action: () -> Unit) {
         }
     })
 }
+
+fun View.setGlobalLayoutObserver(action: () -> Boolean) {
+    viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+        override fun onGlobalLayout() {
+            if (action()) viewTreeObserver.removeOnGlobalLayoutListener(this)
+        }
+    })
+}

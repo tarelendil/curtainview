@@ -11,6 +11,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.triosoft.android.viewslibrary.R
 import com.triosoft.android.viewslibrary.extensions.pixelToDp
 import com.triosoft.android.viewslibrary.extensions.setAnimationEndListener
+import com.triosoft.android.viewslibrary.extensions.setGlobalLayoutObserver
 import com.triosoft.android.viewslibrary.extensions.setOneTimeGlobalLayoutObserver
 import timber.log.Timber
 import kotlin.math.*
@@ -99,13 +100,10 @@ class CurtainContainerView : ConstraintLayout {
         if (actionBarView != null) {
             topOffset = 0
             if (waitForActionBarVisibility) {
-                actionBarView!!.viewTreeObserver.addOnGlobalLayoutListener(object :
-                    ViewTreeObserver.OnGlobalLayoutListener {
-                    override fun onGlobalLayout() {
-                        topOffset = actionBarView!!.height
-                        if (topOffset > 0) viewTreeObserver.removeOnGlobalLayoutListener(this)
-                    }
-                })
+                actionBarView!!.setGlobalLayoutObserver{
+                    topOffset = actionBarView!!.height
+                    topOffset > 0
+                }
             } else actionBarView!!.setOneTimeGlobalLayoutObserver {
                 Timber.i("actionBarView?.viewTreeObserver")
                 topOffset = actionBarView!!.height
