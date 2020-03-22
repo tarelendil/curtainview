@@ -8,7 +8,7 @@
     app:ccv_action_bar="@+id/tv_fake_action_bar"
     app:ccv_curtain_view="@+id/curtain"
     app:ccv_alpha_animation_duration_millis="400"
-    app:ccv_velocity_minimum_threshold="2500"
+    app:ccv_velocity_minimum_threshold="1300"
     tools:context=".activities.TestActivity">
 
         <TextView
