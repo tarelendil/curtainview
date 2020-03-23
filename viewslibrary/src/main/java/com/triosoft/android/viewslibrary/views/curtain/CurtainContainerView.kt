@@ -131,24 +131,20 @@ class CurtainContainerView : ConstraintLayout {
         touchSlop = ViewConfiguration.get(context).scaledTouchSlop
     }
 
-    override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
-        return when (ev.actionMasked) {
+    override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
+        return when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
-                if (curtainView.y == -curtainView.height.toFloat()
-                    && ev.y < this@CurtainContainerView.top + topOffset
-                ) {
+                if (isTouchAtTopPosition(event)) {
                     shouldCheckSlop = true
-                    setEventProperties(true, ev)
-                } else if (this@CurtainContainerView.bottom.toFloat() == curtainView.y + curtainView.height
-                    && ev.y > this@CurtainContainerView.bottom - bottomOffset
-                ) {
+                    setEventProperties(true, event)
+                } else if (isTouchAtBottomPosition(event)) {
                     shouldCheckSlop = true
-                    setEventProperties(false, ev)
+                    setEventProperties(false, event)
                 } else shouldCheckSlop = false
                 false
             }
             MotionEvent.ACTION_MOVE -> {
-                if (shouldCheckSlop && (ev.y - interceptedEventDownYPosition).absoluteValue > touchSlop) {
+                if (shouldCheckSlop && (event.y - interceptedEventDownYPosition).absoluteValue > touchSlop) {
                     isEvent = true
                     true
                 } else false
@@ -164,41 +160,35 @@ class CurtainContainerView : ConstraintLayout {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setContainerOnTouchListener() {
-        this@CurtainContainerView.setOnTouchListener { v, event ->
+        this@CurtainContainerView.setOnTouchListener { containerView, event ->
             var eventConsumed = false
             when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> if (curtainView.y == -curtainView.height.toFloat() && (event.y < this@CurtainContainerView.top + topOffset)) {
+                MotionEvent.ACTION_DOWN -> if (isTouchAtTopPosition(event)) {
                     animateActionBarViewAlpha(toAlpha = true)
                     setEventProperties(true, event)
                     isEvent = true
                     eventConsumed = true
-                } else if (this@CurtainContainerView.bottom.toFloat() == curtainView.y + curtainView.height && event.y > this@CurtainContainerView.bottom - bottomOffset) {
+                } else if (isTouchAtBottomPosition(event)) {
                     setEventProperties(false, event)
                     isEvent = true
                     eventConsumed = true
                 }
                 MotionEvent.ACTION_MOVE -> if (isEvent) {
-                    Timber.i("ACTION_MOVE:\ncontainer.bottom ${this@CurtainContainerView.bottom} | container.top ${this@CurtainContainerView.top} | event.y ${event.y} | movingView.height ${curtainView.height} | bottomTouchPosition $bottomTouchPosition | topTouchPosition $topTouchPosition")
+                    Timber.i("ACTION_MOVE:\ncontainer.bottom ${containerView.bottom} | container.top ${containerView.top} | event.y ${event.y} | movingView.height ${curtainView.height} | bottomTouchPosition $bottomTouchPosition | topTouchPosition $topTouchPosition")
                     wasMovingDown = previousPositionY < event.y
                     val currentVelocity = getVelocity(event) ?: 0f
-                    if (!isInHighVelocityEvent && currentVelocity.roundToInt().absoluteValue in velocityMinThreshold..velocityMaxThreshold) {
+                    if (!isInHighVelocityEvent && isInHighVelocityRange(currentVelocity)) {
                         isInHighVelocityEvent = true
                         lastHighVelocityValue = currentVelocity
-                    } else if (isInHighVelocityEvent && currentVelocity.roundToInt().absoluteValue !in velocityMinThreshold..velocityMaxThreshold) {
+                    } else if (isInHighVelocityEvent && !isInHighVelocityRange(currentVelocity)) {
                         isInHighVelocityEvent = false
                     }
                     curtainView.animate()
                         .y(
-                            if (isTopToBottom) this@CurtainContainerView.top - curtainView.height + min(
-                                event.y - topTouchPosition,
-                                curtainView.height.toFloat()
-                            ) else this@CurtainContainerView.bottom - curtainView.height - (max(
-                                bottomTouchPosition - event.y,
-                                0f
-                            ))
-                        )
-                        .setDuration(0)
-                        .start()
+                            if (isTopToBottom) getYPositionForCurtainMovementFromTopToBottom(event) else getYPositionForCurtainMovementFromBottomToTop(
+                                event
+                            )
+                        ).setDuration(0).start()
                     previousPositionY = event.y
                     eventConsumed = true
                 }
@@ -206,61 +196,58 @@ class CurtainContainerView : ConstraintLayout {
                     if (isEvent) {
                         if (isInHighVelocityEvent) {
                             curtainView.animate()
-                                .y(if (wasMovingDown) this@CurtainContainerView.top.toFloat() else this@CurtainContainerView.top.toFloat() - curtainView.height)
+                                .y(if (wasMovingDown) getCurtainYBottomMovementPosition() else getCurtainYTopMovementPosition())
                                 .setDuration(
                                     calcAnimationDuration(
-                                        wasMovingDown,
-                                        curtainView.y + curtainView.height, true
+                                        isMovingDown = wasMovingDown,
+                                        currentBottomPositionY = getCurtainCurrentYBottomPosition(),
+                                        isHighVelocity = true
                                     )
-                                )
-                                .setAnimationEndListener {
-                                    if (!wasMovingDown) animateActionBarViewAlpha(
-                                        toAlpha = false
-                                    )
+                                ).setAnimationEndListener {
+                                    if (!wasMovingDown) animateActionBarViewAlpha(toAlpha = false)
                                 }.start()
                         } else {
                             if (isTopToBottom) {
-                                if (event.y > this@CurtainContainerView.bottom * 0.4) {
+                                if (event.y > containerView.bottom * 0.4) {
                                     curtainView.animate()
-                                        .y(this@CurtainContainerView.bottom - curtainView.height.toFloat())
+                                        .y(getCurtainYBottomMovementPosition())
                                         .setDuration(
                                             calcAnimationDuration(
                                                 isMovingDown = true,
-                                                currentPositionY = event.y
+                                                currentBottomPositionY = event.y
                                             )
-                                        )
-                                        .start()
+                                        ).start()
                                 } else {
                                     curtainView.animate()
-                                        .y(this@CurtainContainerView.top - curtainView.height.toFloat())
+                                        .y(getCurtainYTopMovementPosition())
                                         .setDuration(
                                             calcAnimationDuration(
                                                 isMovingDown = false,
-                                                currentPositionY = event.y
+                                                currentBottomPositionY = event.y
                                             )
                                         )
                                         .setAnimationEndListener { animateActionBarViewAlpha(toAlpha = false) }
                                         .start()
                                 }
                             } else {
-                                if (curtainView.y + curtainView.height < this@CurtainContainerView.bottom * 0.6) {
+                                if (getCurtainCurrentYBottomPosition() < containerView.bottom * 0.6) {
                                     curtainView.animate()
-                                        .y(this@CurtainContainerView.top - curtainView.height.toFloat())
+                                        .y(getCurtainYTopMovementPosition())
                                         .setDuration(
                                             calcAnimationDuration(
                                                 isMovingDown = false,
-                                                currentPositionY = curtainView.y + curtainView.height
+                                                currentBottomPositionY = getCurtainCurrentYBottomPosition()
                                             )
                                         )
                                         .setAnimationEndListener { animateActionBarViewAlpha(toAlpha = false) }
                                         .start()
                                 } else {
                                     curtainView.animate()
-                                        .y(this@CurtainContainerView.bottom - curtainView.height.toFloat())
+                                        .y(getCurtainYBottomMovementPosition())
                                         .setDuration(
                                             calcAnimationDuration(
                                                 isMovingDown = true,
-                                                currentPositionY = curtainView.y + curtainView.height
+                                                currentBottomPositionY = getCurtainCurrentYBottomPosition()
                                             )
                                         ).start()
                                 }
@@ -282,6 +269,31 @@ class CurtainContainerView : ConstraintLayout {
             eventConsumed
         }
     }
+
+    private fun isTouchAtTopPosition(event: MotionEvent) =
+        curtainView.y == -curtainView.height.toFloat() && (event.y < this@CurtainContainerView.top + topOffset)
+
+    private fun isTouchAtBottomPosition(event: MotionEvent) =
+        this@CurtainContainerView.bottom.toFloat() == curtainView.y + curtainView.height && event.y > this@CurtainContainerView.bottom - bottomOffset
+
+    private fun isInHighVelocityRange(currentVelocity: Float) =
+        currentVelocity.roundToInt().absoluteValue in velocityMinThreshold..velocityMaxThreshold
+
+    private fun getYPositionForCurtainMovementFromTopToBottom(event: MotionEvent) =
+        this@CurtainContainerView.top - curtainView.height + min(
+            event.y - topTouchPosition,
+            curtainView.height.toFloat()
+        )
+
+    private fun getYPositionForCurtainMovementFromBottomToTop(event: MotionEvent) =
+        this@CurtainContainerView.bottom - curtainView.height - max(
+            bottomTouchPosition - event.y,
+            0f
+        )
+
+    private fun getCurtainYTopMovementPosition() = this.top.toFloat() - curtainView.height
+    private fun getCurtainYBottomMovementPosition() = this.top.toFloat()
+    private fun getCurtainCurrentYBottomPosition() = curtainView.y + curtainView.height
 
     private fun setVelocityTracker(event: MotionEvent) {
         // Reset the velocity tracker back to its initial state.
@@ -317,17 +329,17 @@ class CurtainContainerView : ConstraintLayout {
 
     private fun calcAnimationDuration(
         isMovingDown: Boolean,
-        currentPositionY: Float,
+        currentBottomPositionY: Float,
         isHighVelocity: Boolean = false
     ) =
         (if (isMovingDown) {
             val dpUntilBottom = max(
                 0f,
-                resources.pixelToDp(curtainView.height - currentPositionY)
+                resources.pixelToDp(curtainView.height - currentBottomPositionY)
             )
             dpUntilBottom / velocityDpPerMilliSec
         } else {
-            val dpUntilTop = resources.pixelToDp(max(0f, currentPositionY))
+            val dpUntilTop = resources.pixelToDp(max(0f, currentBottomPositionY))
             dpUntilTop / velocityDpPerMilliSec
         } * if (isHighVelocity) 3 else 5).roundToLong()
             .also { Timber.i("calcAnimationDuration: $it") }
@@ -335,7 +347,10 @@ class CurtainContainerView : ConstraintLayout {
 
     private fun animateActionBarViewAlpha(toAlpha: Boolean) {
         actionBarView?.let { view ->
-            AlphaAnimation(if (toAlpha) 1f else 0.1f, if (toAlpha) 0.1f else 1f).let { anim ->
+            AlphaAnimation(
+                if (toAlpha) 1f else 0.1f,
+                if (toAlpha) 0.1f else 1f
+            ).let { anim ->
                 anim.duration = alphaAnimationDurationMillis
                 anim.fillAfter = true
                 view.startAnimation(anim)
@@ -343,10 +358,14 @@ class CurtainContainerView : ConstraintLayout {
         }
     }
 
-    private fun setEventProperties(isTopToBottom: Boolean, event: MotionEvent) {
+    private fun setEventProperties(
+        isTopToBottom: Boolean,
+        event: MotionEvent
+    ) {
         this.isTopToBottom = isTopToBottom
         previousPositionY = event.y
-        if (isTopToBottom) topTouchPosition = event.y else bottomTouchPosition = event.y
+        if (isTopToBottom) topTouchPosition = event.y else bottomTouchPosition =
+            event.y
         setVelocityTracker(event)
     }
 }
