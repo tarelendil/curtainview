@@ -126,7 +126,6 @@ class CurtainContainerView : ConstraintLayout {
         if (velocityMinThreshold == 0) {
             velocityMinThreshold = ViewConfiguration.get(context).scaledMinimumFlingVelocity * 10
         }
-
         velocityMaxThreshold = ViewConfiguration.get(context).scaledMaximumFlingVelocity
         touchSlop = ViewConfiguration.get(context).scaledTouchSlop
     }
@@ -134,13 +133,17 @@ class CurtainContainerView : ConstraintLayout {
     override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
         return when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
-                if (isTouchAtTopPosition(event)) {
-                    shouldCheckSlop = true
-                    setEventProperties(true, event)
-                } else if (isTouchAtBottomPosition(event)) {
-                    shouldCheckSlop = true
-                    setEventProperties(false, event)
-                } else shouldCheckSlop = false
+                when {
+                    isTouchAtTopPosition(event) -> {
+                        shouldCheckSlop = true
+                        setEventProperties(true, event)
+                    }
+                    isTouchAtBottomPosition(event) -> {
+                        shouldCheckSlop = true
+                        setEventProperties(false, event)
+                    }
+                    else -> shouldCheckSlop = false
+                }
                 false
             }
             MotionEvent.ACTION_MOVE -> {
