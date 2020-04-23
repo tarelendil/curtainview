@@ -5,4 +5,4 @@ import android.util.DisplayMetrics
 
 
 fun Resources.pixelToDp(pixels: Float) =
-    pixels / (displayMetrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT)
+    pixels / (displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)

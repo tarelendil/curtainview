@@ -136,10 +136,12 @@ class CurtainContainerView : ConstraintLayout {
                 when {
                     isTouchAtTopPosition(event) -> {
                         shouldCheckSlop = true
+                        interceptedEventDownYPosition = event.y
                         setEventProperties(true, event)
                     }
                     isTouchAtBottomPosition(event) -> {
                         shouldCheckSlop = true
+                        interceptedEventDownYPosition = event.y
                         setEventProperties(false, event)
                     }
                     else -> shouldCheckSlop = false
@@ -196,8 +198,11 @@ class CurtainContainerView : ConstraintLayout {
                     eventConsumed = true
                 }
                 MotionEvent.ACTION_UP -> {
+                    Timber.i("ACTION_UP")
                     if (isEvent) {
+                        Timber.i("isEvent")
                         if (isInHighVelocityEvent) {
+                            Timber.i("isInHighVelocityEvent")
                             curtainView.animate()
                                 .y(if (wasMovingDown) getCurtainYBottomMovementPosition() else getCurtainYTopMovementPosition())
                                 .setDuration(
@@ -217,7 +222,7 @@ class CurtainContainerView : ConstraintLayout {
                                         .setDuration(
                                             calcAnimationDuration(
                                                 isMovingDown = true,
-                                                currentBottomPositionY = event.y
+                                                currentBottomPositionY = getCurtainCurrentYBottomPosition()
                                             )
                                         ).start()
                                 } else {
@@ -226,7 +231,7 @@ class CurtainContainerView : ConstraintLayout {
                                         .setDuration(
                                             calcAnimationDuration(
                                                 isMovingDown = false,
-                                                currentBottomPositionY = event.y
+                                                currentBottomPositionY = getCurtainCurrentYBottomPosition()
                                             )
                                         )
                                         .setAnimationEndListener { animateActionBarViewAlpha(toAlpha = false) }
