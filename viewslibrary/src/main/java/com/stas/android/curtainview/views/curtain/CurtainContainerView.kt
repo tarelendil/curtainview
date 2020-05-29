@@ -38,7 +38,6 @@ class CurtainContainerView : ConstraintLayout {
     private lateinit var curtainView: View
     private var actionBarView: View? = null
     private val velocityDpPerMilliSec = 5
-
     private var isEvent = false
     private var isTopToBottom = false
     private var topTouchPosition = 0f
