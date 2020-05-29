@@ -1,4 +1,4 @@
-package com.triosoft.android.viewslibrary
+package com.stas.android.curtainview
 
 import android.app.Application
 import timber.log.Timber

@@ -1,4 +1,4 @@
-package com.triosoft.android.viewslibrary.extensions
+package com.stas.android.curtainview.extensions
 
 import android.content.res.Resources
 import android.util.DisplayMetrics

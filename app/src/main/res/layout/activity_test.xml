@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.triosoft.android.viewslibrary.views.curtain.CurtainContainerView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.stas.android.curtainview.views.curtain.CurtainContainerView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -195,4 +195,4 @@
         <!--        android:layout_height="match_parent"-->
         <!--        app:cv_container="@+id/container"-->
         <!--        android:background="@color/colorPrimary"/>-->
-</com.triosoft.android.viewslibrary.views.curtain.CurtainContainerView>
+</com.stas.android.curtainview.views.curtain.CurtainContainerView>

@@ -1,4 +1,4 @@
-package com.triosoft.android.viewslibrary.views.curtain
+package com.stas.android.curtainview.views.curtain
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -8,11 +8,11 @@ import android.view.*
 import android.view.animation.AlphaAnimation
 import androidx.annotation.IdRes
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.triosoft.android.viewslibrary.R
-import com.triosoft.android.viewslibrary.extensions.pixelToDp
-import com.triosoft.android.viewslibrary.extensions.setAnimationEndListener
-import com.triosoft.android.viewslibrary.extensions.setGlobalLayoutObserver
-import com.triosoft.android.viewslibrary.extensions.setOneTimeGlobalLayoutObserver
+import com.stas.android.curtainview.R
+import com.stas.android.curtainview.extensions.pixelToDp
+import com.stas.android.curtainview.extensions.setAnimationEndListener
+import com.stas.android.curtainview.extensions.setGlobalLayoutObserver
+import com.stas.android.curtainview.extensions.setOneTimeGlobalLayoutObserver
 import timber.log.Timber
 import kotlin.math.*
 

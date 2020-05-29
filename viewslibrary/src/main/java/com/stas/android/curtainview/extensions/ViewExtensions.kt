@@ -1,4 +1,4 @@
-package com.triosoft.android.viewslibrary.extensions
+package com.stas.android.curtainview.extensions
 
 import android.animation.Animator
 import android.view.View

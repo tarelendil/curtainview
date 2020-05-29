@@ -1,8 +1,8 @@
-package com.triosoft.android.viewslibrary.activities
+package com.stas.android.curtainview.activities
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.triosoft.android.viewslibrary.R
+import com.stas.android.curtainview.R
 
 class TestActivity : AppCompatActivity() {
 
