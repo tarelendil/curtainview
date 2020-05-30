@@ -76,7 +76,7 @@ Add:
 </com.stas.android.curtainview.views.curtain.CurtainContainerView>
 
 ```
-
+**CurtainContainerView is a contraintLayout**, so take a notice and use accordingly.
 <p> Must provide the id of the curtain view that you want to use: <code> app:ccv_curtain_view="@+id/curtain"</code><br>
  The other attributes are optional:<br>
  ccv_action_bar optional top action bar<br>
