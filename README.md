@@ -1,4 +1,4 @@
-# curtainview
+# curtainview UI component for android applications
 A curtain view library for Android applications, similiar to the android top down system curtain, but for in application use.
 
 <h3><b>Gradle configurations</b></h3>
@@ -83,3 +83,19 @@ Add:
  ccv_alpha_animation_duration_millis is optional and will be used for the alpha animation on the action bar if you are using one. If you  did provide an action bar but not the animation duration attribute, the default duration will be used.<br>
  ccv_velocity_minimum_threshold optional: if the velocity is reached then the curtain will move to the bottom or to the top according to the direction of the users touch on the screen.
   </p>
+  
+  ```
+  Copyright 2020 Stas Kranzov
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
