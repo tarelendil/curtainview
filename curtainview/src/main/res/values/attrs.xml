@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<declare-styleable name="CurtainView">
+		<attr name="cv_container" format="reference" />
+		<attr name="cv_action_bar" format="reference" />
+	</declare-styleable>
+	<declare-styleable name="CurtainContainerView">
+		<attr name="ccv_action_bar" format="reference" />
+		<attr name="ccv_curtain_view" format="reference" />
+		<attr name="ccv_alpha_animation_duration_millis" format="integer" />
+		<attr name="ccv_velocity_minimum_threshold" format="integer" />
+		<attr name="ccv_wait_for_action_bar_visibility" format="boolean" />
+	</declare-styleable>
+</resources>
