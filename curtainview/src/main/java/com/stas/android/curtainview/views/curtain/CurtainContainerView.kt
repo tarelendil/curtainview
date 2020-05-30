@@ -129,6 +129,10 @@ class CurtainContainerView : ConstraintLayout {
         touchSlop = ViewConfiguration.get(context).scaledTouchSlop
     }
 
+    /**
+     * If we start the touch over a child view, foe example a button, we would the touch slop
+     * to check if the user just wanted to touch the the button or move the curtain view
+     */
     override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
         return when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {

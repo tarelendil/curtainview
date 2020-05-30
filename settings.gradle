@@ -1,2 +1,2 @@
-rootProject.name='ViewsLibrary'
+rootProject.name='CurtainView'
 include ':app', ':curtainview'
