@@ -19,8 +19,9 @@ Add:
   The view is defined in the xml layout file.
   Please take a look at the sample app test_activity.xml
   <br>Example:<br>
- ```xml
-  <com.stas.android.curtainview.views.curtain.CurtainContainerView 
+  
+  ```
+<com.stas.android.curtainview.views.curtain.CurtainContainerView 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -73,6 +74,7 @@ Add:
                 android:text="Button2" />
         </LinearLayout>    
 </com.stas.android.curtainview.views.curtain.CurtainContainerView>
+
 ```
 
 <p> Must provide the id of the curtain view that you want to use: <code> app:ccv_curtain_view="@+id/curtain"</code><br>
