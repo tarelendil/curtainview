@@ -1,4 +1,4 @@
-package com.stas.android.curtainview
+package com.stas.android.curtainviewsample
 
 import android.app.Application
 import timber.log.Timber

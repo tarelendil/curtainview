@@ -1,4 +1,4 @@
-package com.stas.android.curtainview
+package com.stas.android.curtainviewsample
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

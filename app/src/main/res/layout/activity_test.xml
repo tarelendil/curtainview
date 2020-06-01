@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.stas.android.curtainview.views.curtain.CurtainContainerView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.stas.android.curtainview.views.curtain.CurtainContainerView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000"
     app:ccv_action_bar="@+id/tv_fake_action_bar"
-    app:ccv_curtain_view="@+id/curtain"
+    app:ccv_curtain_view="@+id/curtain_view"
     app:ccv_alpha_animation_duration_millis="400"
     app:ccv_velocity_minimum_threshold="1300"
-    tools:context=".activities.TestActivity">
+    tools:context=".activities.CurtainActivity"
+    android:id="@+id/container_view">
 
         <TextView
             android:id="@+id/tv_fake_action_bar"
@@ -23,6 +25,7 @@
             android:text="Fake Action Bar"/>
 
         <LinearLayout
+            android:id="@+id/main_view"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:gravity="center_horizontal"
@@ -106,7 +109,7 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/curtain"
+            android:id="@+id/curtain_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="#fff"
@@ -190,9 +193,4 @@
                 android:layout_height="wrap_content"
                 android:text="Button6" />
         </LinearLayout>
-        <!--    <com.triosoft.viewslibrary.views.curtain.CurtainView-->
-        <!--        android:layout_width="match_parent"-->
-        <!--        android:layout_height="match_parent"-->
-        <!--        app:cv_container="@+id/container"-->
-        <!--        android:background="@color/colorPrimary"/>-->
 </com.stas.android.curtainview.views.curtain.CurtainContainerView>
