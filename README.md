@@ -15,7 +15,7 @@ to:
        }
    </code><br>
 Add:
-    <code> implementation 'com.github.tarelendil:curtainview:0.0.0.3' </code>
+    <code> implementation 'com.github.tarelendil:curtainview:0.1.1' </code>
     to your application dependecies list
     </p>
  <h3><b>Usage</b></h3>
