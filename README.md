@@ -1,5 +1,5 @@
 # Curtain view UI component for android applications
-A curtain view library to use in your Android applications, its movement behaviour is to some degree similiar to the android top down system curtain.
+A curtain view library to use in your Android applications, its movement behavior is similar to some extent to the android top down system curtain.
 
 (GIF demo)
 <img src="https://github.com/tarelendil/curtainview/blob/master/curtain_gif.gif" width="270" height="480">
@@ -7,7 +7,7 @@ A curtain view library to use in your Android applications, its movement behavio
 <h3><b>Gradle configurations</b></h3>
 <p>Add: 
 <code>maven { url "https://jitpack.io" } </code>
-to:
+<br/>to:
    <code> allprojects {
             repositories {    
                 maven { url "https://jitpack.io" }
@@ -19,8 +19,9 @@ Add:
     to your application dependecies list
     </p>
  <h3><b>Usage</b></h3>
-  The view is defined in the xml layout file.
-  Please take a look at the sample app test_activity.xml
+ Please take a look at the sample app.
+ 
+ The view is defined in the xml layout file.
   <br>Example:<br>
   
   ```
