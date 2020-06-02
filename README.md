@@ -1,5 +1,5 @@
 # curtainview UI component for android applications
-A curtain view library for Android applications, similiar to the android top down system curtain, but for in application use.
+A curtain view library for Android applications, its behaviour is similiar to some degree to the android top down system curtain.
 
 (GIF demo)
 <img src="https://github.com/tarelendil/curtainview/blob/master/curtain_gif.gif" width="270" height="480">
