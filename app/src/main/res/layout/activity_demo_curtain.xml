@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.stas.android.curtainview.views.curtain.CurtainContainerView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000"
+    app:ccv_action_bar="@+id/tv_fake_action_bar"
+    app:ccv_curtain_view="@+id/curtain_view"
+    app:ccv_alpha_animation_duration_millis="400"
+    app:ccv_velocity_minimum_threshold="1300"
+    tools:context=".activities.CurtainActivity"
+    android:id="@+id/container_view">
+
+        <TextView
+            android:id="@+id/tv_fake_action_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            android:background="#406598"
+            android:textSize="25sp"
+            android:textColor="#000"
+            android:gravity="center"
+            android:padding="10dp"
+            android:text="Action Bar"/>
+
+        <LinearLayout
+            android:id="@+id/main_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_fake_action_bar">
+
+            <TextView
+                android:textSize="30sp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="Main screen"
+                android:textColor="#ffffff"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/curtain_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#fff"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:visibility="invisible"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <TextView
+                android:textSize="30sp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="Curtain screen"
+                android:textColor="#3A21B8"/>
+        </LinearLayout>
+</com.stas.android.curtainview.views.curtain.CurtainContainerView>

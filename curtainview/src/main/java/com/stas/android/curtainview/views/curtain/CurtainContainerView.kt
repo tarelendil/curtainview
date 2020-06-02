@@ -358,15 +358,14 @@ class CurtainContainerView : ConstraintLayout {
 
 
     private fun animateActionBarViewAlpha(toAlpha: Boolean) {
-        actionBarView?.let { view ->
-            AlphaAnimation(
+        actionBarView?.run {
+            startAnimation(AlphaAnimation(
                 if (toAlpha) 1f else 0.1f,
                 if (toAlpha) 0.1f else 1f
-            ).let { anim ->
-                anim.duration = alphaAnimationDurationMillis
-                anim.fillAfter = true
-                view.startAnimation(anim)
-            }
+            ).apply {
+                duration = alphaAnimationDurationMillis
+                fillAfter = true
+            })
         }
     }
 

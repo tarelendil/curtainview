@@ -5,17 +5,10 @@ import android.os.Bundle
 import androidx.annotation.VisibleForTesting
 import com.stas.android.curtainviewsample.R
 
-class CurtainActivity : AppCompatActivity() {
+class CurtainDemoActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(getLayoutId())
-    }
-
-    @VisibleForTesting
-    fun getLayoutId() = R.layout.activity_curtain
-
-    companion object {
-        const val WITH_ACTION_BAR = "WITH_ACTION_BAR"
+        setContentView(R.layout.activity_demo_curtain)
     }
 }
