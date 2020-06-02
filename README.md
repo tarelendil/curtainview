@@ -1,6 +1,9 @@
 # curtainview UI component for android applications
 A curtain view library for Android applications, similiar to the android top down system curtain, but for in application use.
 
+(GIF demo)
+<img src="https://github.com/tarelendil/curtainview/blob/master/curtain_gif.gif" width="270" height="480">
+
 <h3><b>Gradle configurations</b></h3>
 <p>Add: 
 <code>maven { url "https://jitpack.io" } </code>
