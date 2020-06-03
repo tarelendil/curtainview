@@ -81,7 +81,7 @@ Add:
 
 ```
 **CurtainContainerView is a contraintLayout**, so take a notice and use accordingly.
-<p> Must provide the id of the curtain view that you want to use: <code> app:ccv_curtain_view="@+id/curtain"</code><br>
+<p> Must provide the id of the curtain view that you want to use, it can be any view, layout that you want: <code> app:ccv_curtain_view="@+id/curtain"</code><br>
  The other attributes are optional:<br>
  ccv_action_bar optional top action bar<br>
  ccv_alpha_animation_duration_millis is optional and will be used for the alpha animation on the action bar if you are using one. If you  did provide an action bar but not the animation duration attribute, the default duration will be used.<br>
@@ -97,7 +97,7 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software
+Unless required by applicable law or agreed to in writing, software hi
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
