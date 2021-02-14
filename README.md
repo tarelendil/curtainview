@@ -1,5 +1,5 @@
-# curtainview UI component for android applications
-A curtain view library for Android applications, its behaviour is similiar to some degree to the android top down system curtain.
+# Curtain view UI component for android applications
+A curtain view library to use in your Android applications, its movement behavior is similar to some extent to the android top down system curtain.
 
 (GIF demo)
 <img src="https://github.com/tarelendil/curtainview/blob/master/curtain_gif.gif" width="270" height="480">
@@ -7,7 +7,7 @@ A curtain view library for Android applications, its behaviour is similiar to so
 <h3><b>Gradle configurations</b></h3>
 <p>Add: 
 <code>maven { url "https://jitpack.io" } </code>
-to:
+<br/>to:
    <code> allprojects {
             repositories {    
                 maven { url "https://jitpack.io" }
@@ -15,12 +15,13 @@ to:
        }
    </code><br>
 Add:
-    <code> implementation 'com.github.tarelendil:curtainview:0.0.0.3' </code>
+    <code> implementation 'com.github.tarelendil:curtainview:0.1.1' </code>
     to your application dependecies list
     </p>
  <h3><b>Usage</b></h3>
-  The view is defined in the xml layout file.
-  Please take a look at the sample app test_activity.xml
+ Please take a look at the sample app.
+ 
+ The view is defined in the xml layout file.
   <br>Example:<br>
   
   ```
@@ -80,7 +81,7 @@ Add:
 
 ```
 **CurtainContainerView is a contraintLayout**, so take a notice and use accordingly.
-<p> Must provide the id of the curtain view that you want to use: <code> app:ccv_curtain_view="@+id/curtain"</code><br>
+<p> Must provide the id of the curtain view that you want to use, it can be any view, layout that you want: <code> app:ccv_curtain_view="@+id/curtain"</code><br>
  The other attributes are optional:<br>
  ccv_action_bar optional top action bar<br>
  ccv_alpha_animation_duration_millis is optional and will be used for the alpha animation on the action bar if you are using one. If you  did provide an action bar but not the animation duration attribute, the default duration will be used.<br>
@@ -96,7 +97,7 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software
+Unless required by applicable law or agreed to in writing, software hi
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
