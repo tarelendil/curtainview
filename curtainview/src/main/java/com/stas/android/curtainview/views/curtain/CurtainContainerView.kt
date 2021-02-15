@@ -7,7 +7,6 @@ import android.util.AttributeSet
 import android.view.*
 import android.view.animation.AlphaAnimation
 import androidx.annotation.IdRes
-import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.stas.android.curtainview.R
 import com.stas.android.curtainview.extensions.pixelToDp
@@ -378,5 +377,19 @@ class CurtainContainerView : ConstraintLayout {
         if (isTopToBottom) topTouchPosition = event.y else bottomTouchPosition =
             event.y
         setVelocityTracker(event)
+    }
+
+    fun slideUp(isHighVelocity: Boolean) {
+        curtainView.animate()
+            .y(getCurtainYTopMovementPosition())
+            .setDuration(
+                calcAnimationDuration(
+                    isMovingDown = false,
+                    currentBottomPositionY = getCurtainCurrentYBottomPosition(),
+                    isHighVelocity = isHighVelocity
+                )
+            ).setAnimationEndListener {
+                animateActionBarViewAlpha(toAlpha = false)
+            }.start()
     }
 }
