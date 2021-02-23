@@ -12,7 +12,6 @@ import com.stas.android.curtainview.R
 import com.stas.android.curtainview.extensions.pixelToDp
 import com.stas.android.curtainview.extensions.setAnimationEndListener
 import com.stas.android.curtainview.extensions.setGlobalLayoutObserver
-import com.stas.android.curtainview.extensions.setOneTimeGlobalLayoutObserver
 import timber.log.Timber
 import kotlin.math.*
 
@@ -50,10 +49,10 @@ class CurtainContainerView : ConstraintLayout {
     private var interceptedEventDownYPosition = 0f
     private var waitForActionBarVisibility = false
     private var lastHighVelocityValue = 0f
-    private var testViewChanges = false
     private var curtainViewHeight: Int = -1
     private var actionBarHeight: Int = -1
     private var containerHeight: Int = -1
+    private var shouldAlphaAnimateActionBar = false
 
     constructor(context: Context) : super(context) {
         initView()
@@ -93,8 +92,8 @@ class CurtainContainerView : ConstraintLayout {
             R.styleable.CurtainContainerView_ccv_wait_for_action_bar_visibility,
             false
         )
-        testViewChanges = attributes.getBoolean(
-            R.styleable.CurtainContainerView_ccv_test_view_changes,
+        shouldAlphaAnimateActionBar = attributes.getBoolean(
+            R.styleable.CurtainContainerView_ccv_should_alpha_animate_action_bar,
             false
         )
         initView()
@@ -107,72 +106,41 @@ class CurtainContainerView : ConstraintLayout {
         actionBarView = findViewById(actionBarId)
         if (actionBarView != null) {
             topOffset = 0
-            if (testViewChanges) {
-                actionBarView!!.setGlobalLayoutObserver {
-                    Timber.i("actionBarView viewTreeObserver")
-                    if (actionBarView!!.height != actionBarHeight) {
-                        Timber.i("old height $actionBarHeight new height:${actionBarView!!.height}")
-                        topOffset = actionBarView!!.height
-                        actionBarHeight = actionBarView!!.height
-                        Timber.i("topOffset $topOffset")
-                    }
-                    false
+            actionBarView!!.setGlobalLayoutObserver {
+                Timber.i("actionBarView viewTreeObserver")
+                if (actionBarView!!.height != actionBarHeight) {
+                    Timber.i("old height $actionBarHeight new height:${actionBarView!!.height}")
+                    topOffset = actionBarView!!.height
+                    actionBarHeight = actionBarView!!.height
+                    Timber.i("topOffset $topOffset")
                 }
-            } else if (waitForActionBarVisibility) {
-                actionBarView!!.setGlobalLayoutObserver {
-                    Timber.i("actionBarView!!.setGlobalLayoutObserver viewTreeObserver")
-                    topOffset = actionBarView!!.height.also {
-                        Timber.i("actionBarView!!.height: $it")
-                    }
-                    topOffset > 0
-                }
-            } else actionBarView!!.setOneTimeGlobalLayoutObserver {
-                Timber.i("actionBarView!!.setOneTimeGlobalLayoutObserver viewTreeObserver")
-                topOffset = actionBarView!!.height.also {
-                    Timber.i("actionBarView!!.height: $it")
-                }
+                false
             }
         } else topOffset = resources.getDimensionPixelSize(R.dimen.swipeStartPositionOffset).also {
             Timber.i("topOffset = resources.getDimensionPixelSize $it")
         }
-
-        if (testViewChanges) {
-            curtainView.setGlobalLayoutObserver {
-                Timber.i("curtainView viewTreeObserver")
-                if (curtainView.height != curtainViewHeight) {
-                    Timber.i("old height $curtainViewHeight new height:${curtainView.height}")
-                    curtainViewHeight = curtainView.height
-                    curtainView.y = this@CurtainContainerView.top - curtainView.height.toFloat()
-                    Timber.i("curtainView.y ${curtainView.y}")
-                }
-                curtainView.visibility = View.VISIBLE
-                false
+        curtainView.setGlobalLayoutObserver {
+            Timber.i("curtainView viewTreeObserver")
+            if (curtainView.height != curtainViewHeight) {
+                Timber.i("old height $curtainViewHeight new height:${curtainView.height}")
+                curtainViewHeight = curtainView.height
+                curtainView.y = this@CurtainContainerView.top - curtainView.height.toFloat()
+                Timber.i("curtainView.y ${curtainView.y}")
             }
-            this.setGlobalLayoutObserver {
-                Timber.i("container viewTreeObserver")
-                if (this.height != containerHeight) {
-                    Timber.i("old height $containerHeight new height:${this.height}")
-                    containerHeight = this.height
-                    bottomOffset = this.height
-                    Timber.i("bottomOffset $bottomOffset")
-                }
-                false
-            }
-        } else {
-            curtainView.setOneTimeGlobalLayoutObserver {
-                Timber.i("curtainView.viewTreeObserver")
-                curtainView.y =
-                    (this@CurtainContainerView.top - curtainView.height.toFloat()).also {
-                        Timber.i("curtainView.y $it}")
-                    }
-                curtainView.visibility = View.VISIBLE
-            }
-            this.setOneTimeGlobalLayoutObserver {
-                bottomOffset = this.height.also {
-                    Timber.i("CurtainView setOneTimeGlobalLayoutObserver viewTreeObserver $it")
-                }
-            }
+            curtainView.visibility = View.VISIBLE
+            false
         }
+        this.setGlobalLayoutObserver {
+            Timber.i("container viewTreeObserver")
+            if (this.height != containerHeight) {
+                Timber.i("old height $containerHeight new height:${this.height}")
+                containerHeight = this.height
+                bottomOffset = this.height
+                Timber.i("bottomOffset $bottomOffset")
+            }
+            false
+        }
+
         setContainerOnTouchListener()
     }
 
@@ -228,6 +196,8 @@ class CurtainContainerView : ConstraintLayout {
         this@CurtainContainerView.setOnTouchListener { containerView, event ->
             var eventConsumed = false
             when (event.actionMasked) {
+                //ACTION_DOWN wan't be called if there are focusable views underneath
+                //and onInterceptTouchEvent ACTION_MOVE didn't return true
                 MotionEvent.ACTION_DOWN -> if (isTouchAtTopPosition(event)) {
                     animateActionBarViewAlpha(toAlpha = true)
                     setEventProperties(true, event)
@@ -414,14 +384,16 @@ class CurtainContainerView : ConstraintLayout {
 
 
     private fun animateActionBarViewAlpha(toAlpha: Boolean) {
-        actionBarView?.run {
-            startAnimation(AlphaAnimation(
-                if (toAlpha) 1f else 0.1f,
-                if (toAlpha) 0.1f else 1f
-            ).apply {
-                duration = alphaAnimationDurationMillis
-                fillAfter = true
-            })
+        if (shouldAlphaAnimateActionBar) {
+            actionBarView?.run {
+                startAnimation(AlphaAnimation(
+                    if (toAlpha) 1f else 0.1f,
+                    if (toAlpha) 0.1f else 1f
+                ).apply {
+                    duration = alphaAnimationDurationMillis
+                    fillAfter = true
+                })
+            }
         }
     }
 
