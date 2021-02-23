@@ -50,6 +50,7 @@ class CurtainContainerView : ConstraintLayout {
     private var interceptedEventDownYPosition = 0f
     private var waitForActionBarVisibility = false
     private var lastHighVelocityValue = 0f
+    private var testViewChanges = false
 
     constructor(context: Context) : super(context) {
         initView()
@@ -89,6 +90,10 @@ class CurtainContainerView : ConstraintLayout {
             R.styleable.CurtainContainerView_ccv_wait_for_action_bar_visibility,
             false
         )
+        testViewChanges = attributes.getBoolean(
+            R.styleable.CurtainContainerView_ccv_test_view_changes,
+            false
+        )
         initView()
         attributes.recycle()
     }
@@ -99,24 +104,55 @@ class CurtainContainerView : ConstraintLayout {
         actionBarView = findViewById(actionBarId)
         if (actionBarView != null) {
             topOffset = 0
-            if (waitForActionBarVisibility) {
+            if (waitForActionBarVisibility || testViewChanges) {
                 actionBarView!!.setGlobalLayoutObserver {
-                    topOffset = actionBarView!!.height
+                    Timber.i("actionBarView!!.setGlobalLayoutObserver viewTreeObserver")
+                    topOffset = actionBarView!!.height.also {
+                        Timber.i("actionBarView!!.height: $it")
+                    }
                     topOffset > 0
                 }
             } else actionBarView!!.setOneTimeGlobalLayoutObserver {
-                Timber.i("actionBarView?.viewTreeObserver")
-                topOffset = actionBarView!!.height
+                Timber.i("actionBarView!!.setOneTimeGlobalLayoutObserver viewTreeObserver")
+                topOffset = actionBarView!!.height.also {
+                    Timber.i("actionBarView!!.height: $it")
+                }
             }
-        } else topOffset = resources.getDimensionPixelSize(R.dimen.swipeStartPositionOffset)
-
-        curtainView.setOneTimeGlobalLayoutObserver {
-            Timber.i("curtainView.viewTreeObserver")
-            curtainView.y = this@CurtainContainerView.top - curtainView.height.toFloat()
-            curtainView.visibility = View.VISIBLE
+        } else topOffset = resources.getDimensionPixelSize(R.dimen.swipeStartPositionOffset).also {
+            Timber.i("topOffset = resources.getDimensionPixelSize $it")
         }
-        this.setOneTimeGlobalLayoutObserver {
-            bottomOffset = this.height
+
+        if(testViewChanges){
+            curtainView.setGlobalLayoutObserver {
+                Timber.i("curtainView.viewTreeObserver")
+                curtainView.y =
+                    (this@CurtainContainerView.top - curtainView.height.toFloat()).also {
+                        Timber.i("curtainView.y ${curtainView.y}")
+                    }
+                curtainView.visibility = View.VISIBLE
+                false
+            }
+            this.setGlobalLayoutObserver {
+                bottomOffset = this.height.also {
+                    Timber.i("CurtainView setOneTimeGlobalLayoutObserver viewTreeObserver $it")
+                }
+                false
+            }
+        }
+        else {
+            curtainView.setOneTimeGlobalLayoutObserver {
+                Timber.i("curtainView.viewTreeObserver")
+                curtainView.y =
+                    (this@CurtainContainerView.top - curtainView.height.toFloat()).also {
+                        Timber.i("curtainView.y ${curtainView.y}")
+                    }
+                curtainView.visibility = View.VISIBLE
+            }
+            this.setOneTimeGlobalLayoutObserver {
+                bottomOffset = this.height.also {
+                    Timber.i("CurtainView setOneTimeGlobalLayoutObserver viewTreeObserver $it")
+                }
+            }
         }
         setContainerOnTouchListener()
     }
