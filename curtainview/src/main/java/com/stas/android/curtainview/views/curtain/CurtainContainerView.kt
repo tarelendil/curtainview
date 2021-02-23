@@ -143,7 +143,7 @@ class CurtainContainerView : ConstraintLayout {
                     Timber.i("old height $curtainViewHeight new height:${curtainView.height}")
                     curtainViewHeight = curtainView.height
                     curtainView.y = this@CurtainContainerView.top - curtainView.height.toFloat()
-                    Timber.i("curtainView.y $curtainView.y")
+                    Timber.i("curtainView.y ${curtainView.y}")
                 }
                 curtainView.visibility = View.VISIBLE
                 false
