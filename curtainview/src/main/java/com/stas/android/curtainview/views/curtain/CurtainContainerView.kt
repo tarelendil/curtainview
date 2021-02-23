@@ -127,7 +127,7 @@ class CurtainContainerView : ConstraintLayout {
                 Timber.i("curtainView.viewTreeObserver")
                 curtainView.y =
                     (this@CurtainContainerView.top - curtainView.height.toFloat()).also {
-                        Timber.i("curtainView.y ${curtainView.y}")
+                        Timber.i("curtainView.y $it")
                     }
                 curtainView.visibility = View.VISIBLE
                 false
@@ -144,7 +144,7 @@ class CurtainContainerView : ConstraintLayout {
                 Timber.i("curtainView.viewTreeObserver")
                 curtainView.y =
                     (this@CurtainContainerView.top - curtainView.height.toFloat()).also {
-                        Timber.i("curtainView.y ${curtainView.y}")
+                        Timber.i("curtainView.y $it}")
                     }
                 curtainView.visibility = View.VISIBLE
             }
@@ -162,7 +162,9 @@ class CurtainContainerView : ConstraintLayout {
             velocityMinThreshold = ViewConfiguration.get(context).scaledMinimumFlingVelocity * 10
         }
         velocityMaxThreshold = ViewConfiguration.get(context).scaledMaximumFlingVelocity
-        touchSlop = ViewConfiguration.get(context).scaledTouchSlop
+        touchSlop = ViewConfiguration.get(context).scaledTouchSlop.also {
+            Timber.i("slope$it")
+        }
     }
 
     /**
