@@ -10,6 +10,7 @@
     app:ccv_curtain_view="@+id/curtain_view"
     app:ccv_alpha_animation_duration_millis="400"
     app:ccv_velocity_minimum_threshold="1300"
+    app:ccv_test_view_changes="true"
     tools:context=".activities.CurtainActivity"
     android:id="@+id/container_view">
 

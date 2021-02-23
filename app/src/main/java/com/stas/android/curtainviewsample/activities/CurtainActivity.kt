@@ -15,19 +15,19 @@ class CurtainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         activityCurtainBinding = ActivityCurtainBinding.inflate(layoutInflater)
-        window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS) // Used to exclude layout components when transitioning
-        window.decorView.setOnSystemUiVisibilityChangeListener {
-            if(it == View.VISIBLE) {
-                hideSystemUi()
-            }
-        }
+//        window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS) // Used to exclude layout components when transitioning
+//        window.decorView.setOnSystemUiVisibilityChangeListener {
+//            if(it == View.VISIBLE) {
+//                hideSystemUi()
+//            }
+//        }
         setContentView(activityCurtainBinding.root)
 
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
-        if (hasFocus) hideSystemUi()
+//        if (hasFocus) hideSystemUi()
     }
 
     @VisibleForTesting

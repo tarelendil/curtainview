@@ -51,6 +51,9 @@ class CurtainContainerView : ConstraintLayout {
     private var waitForActionBarVisibility = false
     private var lastHighVelocityValue = 0f
     private var testViewChanges = false
+    private var curtainViewHeight: Int = -1
+    private var actionBarHeight: Int = -1
+    private var containerHeight: Int = -1
 
     constructor(context: Context) : super(context) {
         initView()
@@ -104,7 +107,18 @@ class CurtainContainerView : ConstraintLayout {
         actionBarView = findViewById(actionBarId)
         if (actionBarView != null) {
             topOffset = 0
-            if (waitForActionBarVisibility || testViewChanges) {
+            if (testViewChanges) {
+                actionBarView!!.setGlobalLayoutObserver {
+                    Timber.i("actionBarView viewTreeObserver")
+                    if (actionBarView!!.height != actionBarHeight) {
+                        Timber.i("old height $actionBarHeight new height:${actionBarView!!.height}")
+                        topOffset = actionBarView!!.height
+                        actionBarHeight = actionBarView!!.height
+                        Timber.i("topOffset $topOffset")
+                    }
+                    false
+                }
+            } else if (waitForActionBarVisibility) {
                 actionBarView!!.setGlobalLayoutObserver {
                     Timber.i("actionBarView!!.setGlobalLayoutObserver viewTreeObserver")
                     topOffset = actionBarView!!.height.also {
@@ -122,24 +136,29 @@ class CurtainContainerView : ConstraintLayout {
             Timber.i("topOffset = resources.getDimensionPixelSize $it")
         }
 
-        if(testViewChanges){
+        if (testViewChanges) {
             curtainView.setGlobalLayoutObserver {
-                Timber.i("curtainView.viewTreeObserver")
-                curtainView.y =
-                    (this@CurtainContainerView.top - curtainView.height.toFloat()).also {
-                        Timber.i("curtainView.y $it")
-                    }
+                Timber.i("curtainView viewTreeObserver")
+                if (curtainView.height != curtainViewHeight) {
+                    Timber.i("old height $curtainViewHeight new height:${curtainView.height}")
+                    curtainViewHeight = curtainView.height
+                    curtainView.y = this@CurtainContainerView.top - curtainView.height.toFloat()
+                    Timber.i("curtainView.y $curtainView.y")
+                }
                 curtainView.visibility = View.VISIBLE
                 false
             }
             this.setGlobalLayoutObserver {
-                bottomOffset = this.height.also {
-                    Timber.i("CurtainView setOneTimeGlobalLayoutObserver viewTreeObserver $it")
+                Timber.i("container viewTreeObserver")
+                if (this.height != containerHeight) {
+                    Timber.i("old height $containerHeight new height:${this.height}")
+                    containerHeight = this.height
+                    bottomOffset = this.height
+                    Timber.i("bottomOffset $bottomOffset")
                 }
                 false
             }
-        }
-        else {
+        } else {
             curtainView.setOneTimeGlobalLayoutObserver {
                 Timber.i("curtainView.viewTreeObserver")
                 curtainView.y =
