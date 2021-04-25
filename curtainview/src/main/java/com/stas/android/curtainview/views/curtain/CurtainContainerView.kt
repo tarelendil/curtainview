@@ -107,8 +107,8 @@ class CurtainContainerView : ConstraintLayout {
         if (actionBarView != null) {
             topOffset = 0
             actionBarView!!.setGlobalLayoutObserver {
-                Timber.i("actionBarView viewTreeObserver")
                 if (actionBarView!!.height != actionBarHeight) {
+                    Timber.i("actionBarView viewTreeObserver")
                     Timber.i("old height $actionBarHeight new height:${actionBarView!!.height}")
                     topOffset = actionBarView!!.height
                     actionBarHeight = actionBarView!!.height
@@ -120,19 +120,19 @@ class CurtainContainerView : ConstraintLayout {
             Timber.i("topOffset = resources.getDimensionPixelSize $it")
         }
         curtainView.setGlobalLayoutObserver {
-            Timber.i("curtainView viewTreeObserver")
             if (curtainView.height != curtainViewHeight) {
+                Timber.i("curtainView viewTreeObserver")
                 Timber.i("old height $curtainViewHeight new height:${curtainView.height}")
                 curtainViewHeight = curtainView.height
                 curtainView.y = this@CurtainContainerView.top - curtainView.height.toFloat()
                 Timber.i("curtainView.y ${curtainView.y}")
+                curtainView.visibility = View.VISIBLE
             }
-            curtainView.visibility = View.VISIBLE
             false
         }
         this.setGlobalLayoutObserver {
-            Timber.i("container viewTreeObserver")
             if (this.height != containerHeight) {
+                Timber.i("container viewTreeObserver")
                 Timber.i("old height $containerHeight new height:${this.height}")
                 containerHeight = this.height
                 bottomOffset = this.height
@@ -185,7 +185,7 @@ class CurtainContainerView : ConstraintLayout {
 
             else -> false.also {
                 shouldCheckSlop = false
-                Timber.i("onInterceptTouchEvent else")
+//                Timber.i("onInterceptTouchEvent else")
             }
 
         }
