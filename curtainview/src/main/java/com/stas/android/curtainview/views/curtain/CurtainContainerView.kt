@@ -209,7 +209,7 @@ class CurtainContainerView : ConstraintLayout {
                     eventConsumed = true
                 }
                 MotionEvent.ACTION_MOVE -> if (isEvent) {
-                    Timber.i("ACTION_MOVE:\ncontainer.bottom ${containerView.bottom} | container.top ${containerView.top} | event.y ${event.y} | movingView.height ${curtainView.height} | bottomTouchPosition $bottomTouchPosition | topTouchPosition $topTouchPosition")
+//                    Timber.i("ACTION_MOVE:\ncontainer.bottom ${containerView.bottom} | container.top ${containerView.top} | event.y ${event.y} | movingView.height ${curtainView.height} | bottomTouchPosition $bottomTouchPosition | topTouchPosition $topTouchPosition")
                     wasMovingDown = previousPositionY < event.y
                     val currentVelocity = getVelocity(event) ?: 0f
                     if (!isInHighVelocityEvent && isInHighVelocityRange(currentVelocity)) {
@@ -228,11 +228,11 @@ class CurtainContainerView : ConstraintLayout {
                     eventConsumed = true
                 }
                 MotionEvent.ACTION_UP -> {
-                    Timber.i("ACTION_UP")
+//                    Timber.i("ACTION_UP")
                     if (isEvent) {
-                        Timber.i("isEvent")
+//                        Timber.i("isEvent")
                         if (isInHighVelocityEvent) {
-                            Timber.i("isInHighVelocityEvent")
+//                            Timber.i("isInHighVelocityEvent")
                             curtainView.animate()
                                 .y(if (wasMovingDown) getCurtainYBottomMovementPosition() else getCurtainYTopMovementPosition())
                                 .setDuration(
@@ -361,7 +361,7 @@ class CurtainContainerView : ConstraintLayout {
             // Log velocity of pixels per second
             // Best practice to use VelocityTrackerCompat where possible.
             val yVelocity = getYVelocity(pointerId)
-            Timber.i("Y velocity: $yVelocity")
+//            Timber.i("Y velocity: $yVelocity")
             yVelocity
         }
 
@@ -380,7 +380,7 @@ class CurtainContainerView : ConstraintLayout {
             val dpUntilTop = resources.pixelToDp(max(0f, currentBottomPositionY))
             dpUntilTop / velocityDpPerMilliSec
         } * if (isHighVelocity) 3 else 5).roundToLong()
-            .also { Timber.i("calcAnimationDuration: $it") }
+//            .also { Timber.i("calcAnimationDuration: $it") }
 
 
     private fun animateActionBarViewAlpha(toAlpha: Boolean) {
