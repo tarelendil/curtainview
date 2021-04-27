@@ -1,11 +1,11 @@
 package com.stas.android.curtainviewsample.activities
 
 import android.os.Bundle
+import android.os.Handler
 import android.view.View
 import android.view.Window
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
-import com.stas.android.curtainview.views.curtain.CurtainContainerView
 import com.stas.android.curtainviewsample.R
 import com.stas.android.curtainviewsample.databinding.ActivityCurtainBinding
 
@@ -17,12 +17,17 @@ class CurtainActivity : AppCompatActivity() {
         activityCurtainBinding = ActivityCurtainBinding.inflate(layoutInflater)
         window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS) // Used to exclude layout components when transitioning
         window.decorView.setOnSystemUiVisibilityChangeListener {
-            if(it == View.VISIBLE) {
+            if (it == View.VISIBLE) {
                 hideSystemUi()
             }
         }
         setContentView(activityCurtainBinding.root)
-
+        val handler = Handler()
+        activityCurtainBinding.containerView.enableCurtain(enable = false)
+        handler.postDelayed(
+            { activityCurtainBinding.containerView.enableCurtain(enable = true) },
+            40_000
+        )
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
