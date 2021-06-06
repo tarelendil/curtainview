@@ -12,8 +12,10 @@ import com.stas.android.curtainview.R
 import com.stas.android.curtainview.extensions.pixelToDp
 import com.stas.android.curtainview.extensions.setAnimationEndListener
 import com.stas.android.curtainview.extensions.setGlobalLayoutObserver
+import com.stas.android.curtainview.listeners.CurtainViewDisplayListener
 import timber.log.Timber
 import kotlin.math.*
+import kotlin.properties.Delegates
 
 
 /**
@@ -21,6 +23,7 @@ import kotlin.math.*
  */
 class CurtainContainerView : ConstraintLayout {
 
+    private var curtainViewDisplayListener: CurtainViewDisplayListener? = null
     private var velocityTracker: VelocityTracker? = null
     private var velocityMinThreshold: Int = 0
     private var velocityMaxThreshold: Int = 0
@@ -54,6 +57,12 @@ class CurtainContainerView : ConstraintLayout {
     private var containerHeight: Int = -1
     private var shouldAlphaAnimateActionBar = false
     private var curtainEnabled = true
+    private var isCurtainViewFullyShown: Boolean by Delegates.observable(false) { _, oldValue, newValue ->
+        if (oldValue != newValue) {
+            if (newValue) curtainViewDisplayListener?.onFullyDisplayed()
+            else curtainViewDisplayListener?.onTransitioningFromFullDisplay()
+        }
+    }
 
     constructor(context: Context) : super(context) {
         initView()
@@ -199,9 +208,9 @@ class CurtainContainerView : ConstraintLayout {
             else {
                 var eventConsumed = false
                 when (event.actionMasked) {
-                    //ACTION_DOWN wan't be called if there are focusable views underneath
+                    //ACTION_DOWN won't be called if there are focusable views underneath
                     //and onInterceptTouchEvent ACTION_MOVE didn't return true,
-                        // otherwise it will be called
+                    // otherwise it will be called
                     MotionEvent.ACTION_DOWN -> if (isTouchAtTopPosition(event)) {
                         animateActionBarViewAlpha(toAlpha = true)
                         setEventProperties(true, event)
@@ -222,14 +231,18 @@ class CurtainContainerView : ConstraintLayout {
                         } else if (isInHighVelocityEvent && !isInHighVelocityRange(currentVelocity)) {
                             isInHighVelocityEvent = false
                         }
+                        val yPositionToMove = if (isTopToBottom) {
+                            getYPositionForCurtainMovementFromTopToBottom(event)
+                        } else {
+                            getYPositionForCurtainMovementFromBottomToTop(event)
+                        }
                         curtainView.animate()
-                            .y(
-                                if (isTopToBottom) getYPositionForCurtainMovementFromTopToBottom(
-                                    event
-                                ) else getYPositionForCurtainMovementFromBottomToTop(
-                                    event
-                                )
-                            ).setDuration(0).start()
+                            .y(yPositionToMove).setAnimationEndListener {
+                                if (yPositionToMove < containerView.top) isCurtainViewFullyShown =
+                                    false
+                                else if (yPositionToMove == containerView.y) isCurtainViewFullyShown =
+                                    true
+                            }.setDuration(0).start()
                         previousPositionY = event.y
                         eventConsumed = true
                     }
@@ -249,6 +262,7 @@ class CurtainContainerView : ConstraintLayout {
                                         )
                                     ).setAnimationEndListener {
                                         if (!wasMovingDown) animateActionBarViewAlpha(toAlpha = false)
+                                        if (wasMovingDown) isCurtainViewFullyShown = true
                                     }.start()
                             } else {
                                 if (isTopToBottom) {
@@ -260,7 +274,11 @@ class CurtainContainerView : ConstraintLayout {
                                                     isMovingDown = true,
                                                     currentBottomPositionY = getCurtainCurrentYBottomPosition()
                                                 )
-                                            ).start()
+                                            )
+                                            .setAnimationEndListener {
+                                                isCurtainViewFullyShown = true
+                                            }
+                                            .start()
                                     } else {
                                         curtainView.animate()
                                             .y(getCurtainYTopMovementPosition())
@@ -301,7 +319,9 @@ class CurtainContainerView : ConstraintLayout {
                                                     isMovingDown = true,
                                                     currentBottomPositionY = getCurtainCurrentYBottomPosition()
                                                 )
-                                            ).start()
+                                            ).setAnimationEndListener {
+                                                isCurtainViewFullyShown = true
+                                            }.start()
                                     }
                                 }
                             }
@@ -439,5 +459,10 @@ class CurtainContainerView : ConstraintLayout {
 
     fun enableCurtain(enable: Boolean) {
         curtainEnabled = enable
+    }
+
+    fun setCurtainViewDisplayListener(curtainViewDisplayListener: CurtainViewDisplayListener) {
+        this.curtainViewDisplayListener = curtainViewDisplayListener
+
     }
 }

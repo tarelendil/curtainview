@@ -1,11 +1,12 @@
 package com.stas.android.curtainviewsample.activities
 
 import android.os.Bundle
-import android.os.Handler
 import android.view.View
 import android.view.Window
+import android.widget.Toast
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
+import com.stas.android.curtainview.listeners.CurtainViewDisplayListener
 import com.stas.android.curtainviewsample.R
 import com.stas.android.curtainviewsample.databinding.ActivityCurtainBinding
 
@@ -22,12 +23,22 @@ class CurtainActivity : AppCompatActivity() {
             }
         }
         setContentView(activityCurtainBinding.root)
-        val handler = Handler()
-        activityCurtainBinding.containerView.enableCurtain(enable = false)
-        handler.postDelayed(
-            { activityCurtainBinding.containerView.enableCurtain(enable = true) },
-            40_000
-        )
+        activityCurtainBinding.containerView.setCurtainViewDisplayListener(object : CurtainViewDisplayListener {
+            override fun onFullyDisplayed() {
+                Toast.makeText(this@CurtainActivity, "FULL", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onTransitioningFromFullDisplay() {
+                Toast.makeText(this@CurtainActivity, "NOT FULL ANYMORE", Toast.LENGTH_SHORT).show()
+
+            }
+        })
+//        val handler = Handler()
+//        activityCurtainBinding.containerView.enableCurtain(enable = false)
+//        handler.postDelayed(
+//            { activityCurtainBinding.containerView.enableCurtain(enable = true) },
+//            40_000
+//        )
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {

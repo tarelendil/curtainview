@@ -25,12 +25,16 @@
             android:gravity="center"
             android:padding="20dp"
             android:text="Action Bar"/>
-
+        <ScrollView
+            app:layout_constraintTop_toBottomOf="@+id/tv_fake_action_bar"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:fillViewport="true">
         <LinearLayout
             android:id="@+id/main_view"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:gravity="center_horizontal"
+            android:layout_height="wrap_content"
+            android:gravity="start"
             android:orientation="vertical"
             app:layout_constraintTop_toBottomOf="@+id/tv_fake_action_bar">
 
@@ -109,12 +113,12 @@
                 android:layout_height="wrap_content"
                 android:text="Button6" />
         </LinearLayout>
-
+        </ScrollView>
         <LinearLayout
             android:id="@+id/curtain_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#fff"
+            android:background="#74AA75"
             android:gravity="center_horizontal"
             android:orientation="vertical"
             android:visibility="invisible"
