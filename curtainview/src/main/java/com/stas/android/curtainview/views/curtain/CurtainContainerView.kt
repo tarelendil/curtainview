@@ -59,10 +59,13 @@ class CurtainContainerView : ConstraintLayout {
     private var shouldAlphaAnimateActionBar = false
     private var curtainEnabled = true
     private var isCurtainViewFullyShown: Boolean by Delegates.observable(false) { _, oldValue, newValue ->
-        if (oldValue != newValue) {
-            if (newValue) curtainViewDisplayListener?.onFullyDisplayed()
-            else curtainViewDisplayListener?.onTransitioningFromFullDisplay()
+        curtainViewDisplayListener?.run {
+            if (oldValue != newValue) {
+                if (newValue) onFullyDisplayed()
+                else onTransitioningFromFullDisplay()
+            }
         }
+
     }
 
     constructor(context: Context) : super(context) {
