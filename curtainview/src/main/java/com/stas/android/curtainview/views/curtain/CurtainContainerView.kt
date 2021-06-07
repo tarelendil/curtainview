@@ -11,6 +11,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.stas.android.curtainview.R
 import com.stas.android.curtainview.extensions.pixelToDp
 import com.stas.android.curtainview.extensions.setAnimationEndListener
+import com.stas.android.curtainview.extensions.setAnimationStartAndEndListener
 import com.stas.android.curtainview.extensions.setGlobalLayoutObserver
 import com.stas.android.curtainview.listeners.CurtainViewDisplayListener
 import timber.log.Timber
@@ -452,9 +453,11 @@ class CurtainContainerView : ConstraintLayout {
                     currentBottomPositionY = getCurtainCurrentYBottomPosition(),
                     isHighVelocity = isHighVelocity
                 )
-            ).setAnimationEndListener {
+            ).setAnimationStartAndEndListener({
+                isCurtainViewFullyShown = false
+            }, {
                 animateActionBarViewAlpha(toAlpha = false)
-            }.start()
+            }).start()
     }
 
     fun enableCurtain(enable: Boolean) {

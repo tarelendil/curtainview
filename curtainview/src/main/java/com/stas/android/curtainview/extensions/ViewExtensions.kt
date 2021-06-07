@@ -18,6 +18,20 @@ fun ViewPropertyAnimator.setAnimationEndListener(action: () -> Unit): ViewProper
         override fun onAnimationStart(animation: Animator?) {}
     })
 
+fun ViewPropertyAnimator.setAnimationStartAndEndListener(actionStart: () -> Unit, actionEnd: () -> Unit): ViewPropertyAnimator =
+    setListener(object : Animator.AnimatorListener {
+        override fun onAnimationRepeat(animation: Animator?) {}
+        override fun onAnimationEnd(animation: Animator?) {
+            setListener(null)
+            actionEnd()
+        }
+
+        override fun onAnimationCancel(animation: Animator?) {}
+        override fun onAnimationStart(animation: Animator?) {
+            actionStart()
+        }
+    })
+
 fun View.setOneTimeGlobalLayoutObserver(action: () -> Unit) {
     viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
         override fun onGlobalLayout() {

@@ -33,6 +33,9 @@ class CurtainActivity : AppCompatActivity() {
 
             }
         })
+        activityCurtainBinding.btSlideUp.setOnClickListener {
+            activityCurtainBinding.containerView.slideUp(isHighVelocity = true)
+        }
 //        val handler = Handler()
 //        activityCurtainBinding.containerView.enableCurtain(enable = false)
 //        handler.postDelayed(
