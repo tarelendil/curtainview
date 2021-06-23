@@ -180,12 +180,12 @@ class CurtainContainerView : ConstraintLayout {
                     isTouchAtTopPosition(event) -> {
                         shouldCheckSlop = true
                         interceptedEventDownYPosition = event.y
-                        setEventProperties(true, event)
+                        this.isTopToBottom = true
                     }
                     isTouchAtBottomPosition(event) -> {
                         shouldCheckSlop = true
                         interceptedEventDownYPosition = event.y
-                        setEventProperties(false, event)
+                        this.isTopToBottom = false
                     }
                     else -> shouldCheckSlop = false
                 }
@@ -194,6 +194,7 @@ class CurtainContainerView : ConstraintLayout {
             MotionEvent.ACTION_MOVE -> {
                 if (shouldCheckSlop && (event.y - interceptedEventDownYPosition).absoluteValue > touchSlop) {
                     isEvent = true
+                    setEventProperties(isTopToBottom, event)
                     true
                 } else false
             }
@@ -445,6 +446,14 @@ class CurtainContainerView : ConstraintLayout {
         if (isTopToBottom) topTouchPosition = event.y else bottomTouchPosition =
             event.y
         setVelocityTracker(event)
+    }
+
+    private fun setInitialEventProperties(
+        isTopToBottom: Boolean,
+        event: MotionEvent
+    ) {
+        this.isTopToBottom = isTopToBottom
+        previousPositionY = event.y
     }
 
     fun slideUp(isHighVelocity: Boolean) {
