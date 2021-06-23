@@ -463,6 +463,22 @@ class CurtainContainerView : ConstraintLayout {
             }).start()
     }
 
+    fun slideDown(isHighVelocity: Boolean) {
+        curtainView.animate()
+            .y(getCurtainYBottomMovementPosition())
+            .setDuration(
+                calcAnimationDuration(
+                    isMovingDown = true,
+                    currentBottomPositionY = getCurtainCurrentYBottomPosition(),
+                    isHighVelocity = isHighVelocity
+                )
+            ).setAnimationStartAndEndListener({
+                isCurtainViewFullyShown = true
+            }, {
+                animateActionBarViewAlpha(toAlpha = true)
+            }).start()
+    }
+
     fun enableCurtain(enable: Boolean) {
         curtainEnabled = enable
     }

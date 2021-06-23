@@ -36,6 +36,11 @@ class CurtainActivity : AppCompatActivity() {
         activityCurtainBinding.btSlideUp.setOnClickListener {
             activityCurtainBinding.containerView.slideUp(isHighVelocity = true)
         }
+
+        activityCurtainBinding.tvFakeActionBar.setOnClickListener {
+            Toast.makeText(this@CurtainActivity, "CLICKABLE", Toast.LENGTH_SHORT).show()
+            activityCurtainBinding.containerView.slideDown(isHighVelocity = false)
+        }
 //        val handler = Handler()
 //        activityCurtainBinding.containerView.enableCurtain(enable = false)
 //        handler.postDelayed(
