@@ -41,6 +41,8 @@ class CurtainActivity : AppCompatActivity() {
             Toast.makeText(this@CurtainActivity, "CLICKABLE", Toast.LENGTH_SHORT).show()
             activityCurtainBinding.containerView.slideDown(isHighVelocity = false)
         }
+
+        activityCurtainBinding.containerView.enableCurtain(enable = false)
 //        val handler = Handler()
 //        activityCurtainBinding.containerView.enableCurtain(enable = false)
 //        handler.postDelayed(

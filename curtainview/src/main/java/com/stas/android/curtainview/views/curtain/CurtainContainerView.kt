@@ -457,35 +457,39 @@ class CurtainContainerView : ConstraintLayout {
     }
 
     fun slideUp(isHighVelocity: Boolean) {
-        curtainView.animate()
-            .y(getCurtainYTopMovementPosition())
-            .setDuration(
-                calcAnimationDuration(
-                    isMovingDown = false,
-                    currentBottomPositionY = getCurtainCurrentYBottomPosition(),
-                    isHighVelocity = isHighVelocity
-                )
-            ).setAnimationStartAndEndListener({
-                isCurtainViewFullyShown = false
-            }, {
-                animateActionBarViewAlpha(toAlpha = false)
-            }).start()
+        if (curtainEnabled) {
+            curtainView.animate()
+                .y(getCurtainYTopMovementPosition())
+                .setDuration(
+                    calcAnimationDuration(
+                        isMovingDown = false,
+                        currentBottomPositionY = getCurtainCurrentYBottomPosition(),
+                        isHighVelocity = isHighVelocity
+                    )
+                ).setAnimationStartAndEndListener({
+                    isCurtainViewFullyShown = false
+                }, {
+                    animateActionBarViewAlpha(toAlpha = false)
+                }).start()
+        }
     }
 
     fun slideDown(isHighVelocity: Boolean) {
-        curtainView.animate()
-            .y(getCurtainYBottomMovementPosition())
-            .setDuration(
-                calcAnimationDuration(
-                    isMovingDown = true,
-                    currentBottomPositionY = getCurtainCurrentYBottomPosition(),
-                    isHighVelocity = isHighVelocity
-                )
-            ).setAnimationStartAndEndListener({
-                isCurtainViewFullyShown = true
-            }, {
-                animateActionBarViewAlpha(toAlpha = true)
-            }).start()
+        if (curtainEnabled) {
+            curtainView.animate()
+                .y(getCurtainYBottomMovementPosition())
+                .setDuration(
+                    calcAnimationDuration(
+                        isMovingDown = true,
+                        currentBottomPositionY = getCurtainCurrentYBottomPosition(),
+                        isHighVelocity = isHighVelocity
+                    )
+                ).setAnimationStartAndEndListener({
+                    isCurtainViewFullyShown = true
+                }, {
+                    animateActionBarViewAlpha(toAlpha = true)
+                }).start()
+        }
     }
 
     fun enableCurtain(enable: Boolean) {
